@@ -17,6 +17,12 @@ import pandas as pd
 import numpy as np
 import cdlib
 from cdlib import algorithms
+try:
+    import cdlib
+    from cdlib import algorithms
+    HAS_CDLIB = True
+except ImportError:
+    HAS_CDLIB = False
 from src.utils import setup_logger, PROCESSED_DATA_DIR
 logger = setup_logger()
 class ContinuousTimeGraphEngine:
@@ -90,6 +96,8 @@ class ContinuousTimeGraphEngine:
             if node in self.node_features:
                 self.node_features[node]['in_volume'] = in_degree[node] if node in in_degree else 0
                 self.node_features[node]['out_volume'] = out_degree[node] if node in out_degree else 0
+                self.node_features[node]['in_volume'] = in_degree[node]
+                self.node_features[node]['out_volume'] = out_degree[node]
                 
                 in_v = self.node_features[node]['in_volume']
                 out_v = self.node_features[node]['out_volume']
@@ -107,6 +115,7 @@ class ContinuousTimeGraphEngine:
                 dfa = 0.0
             else:
                 dfa = abs(out_vol - in_vol) / (out_vol + in_vol + 1e-5)
+                dfa = abs(out_vol - in_vol) / (out_vol + in_vol)
             self.node_features[node]['dfa_score'] = dfa
             
     def compute_hawkes_intensity(self, mu=0.01, alpha=0.5, beta=1.0):
@@ -156,6 +165,14 @@ class ContinuousTimeGraphEngine:
     def detect_communities_leiden(self):
         """Applies Leiden hierarchical partitioning to detect communities."""
         logger.info("Applying Leiden community detection...")
+        if not HAS_CDLIB:
+            logger.warning("cdlib is not installed. Defaulting all nodes to community 0.")
+            for node in self.G.nodes():
+                self.community_map[node] = 0
+                if node in self.node_features:
+                    self.node_features[node]['community_id'] = 0
+            return
+            
         # Leiden requires simple undirected graph via igraph or cdlib
         simple_G = nx.Graph(self.G) 
         try:
@@ -169,6 +186,9 @@ class ContinuousTimeGraphEngine:
             logger.error(f"Leiden algorithm failed, defaulting to 0: {e}")
             for node in self.G.nodes():
                 self.node_features[node]['community_id'] = 0
+                self.community_map[node] = 0
+                if node in self.node_features:
+                    self.node_features[node]['community_id'] = 0
                 
     def compute_community_risk_indices(self):
         """Calculates risk density indices for each community."""
