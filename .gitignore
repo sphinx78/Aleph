@@ -1,0 +1,58 @@
+# ===========================
+# AMLIOS-X .gitignore
+# ===========================
+
+# ----- Data files (large CSVs, XMLs) -----
+data/STUDENT_DATASET/
+data/raw/
+*.csv
+*.xml
+!data/processed/.gitkeep
+
+# ----- Python -----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg
+
+# ----- Virtual environments -----
+venv/
+.venv/
+env/
+.env
+
+# ----- Model artifacts -----
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.pth
+models/
+
+# ----- Jupyter Notebooks -----
+.ipynb_checkpoints/
+
+# ----- IDE -----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ----- OS -----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ----- Streamlit -----
+.streamlit/
+
+# ----- Misc -----
+*.log
+*.zip
+*.tar.gz
