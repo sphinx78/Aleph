@@ -4,8 +4,8 @@ AMLIOS-X Data Loader Module
 Handles:
 - Loading CSV datasets (transactions, accounts, graph edges, ML features)
 - Parsing STR XML reports from the reports/ directory
-- Phonetic entity resolution using Soundex matching
-- STR narrative evidence verification against transaction graph
+- Enhanced phonetic entity resolution using Soundex and Levenshtein fuzzy string similarity
+- STR narrative evidence verification against transaction graph features
 """
 
 import os
@@ -13,6 +13,7 @@ import glob
 import xml.etree.ElementTree as ET
 import pandas as pd
 import re
+import Levenshtein
 import logging
 from typing import Dict, List, Optional
 from src.utils import setup_logger, RAW_DATA_DIR, PROCESSED_DATA_DIR, REPORTS_DIR
@@ -166,9 +167,9 @@ class AMLDataParser:
     def match_and_link_entities(self, extracted_entities_df: pd.DataFrame) -> pd.DataFrame:
         """
         Matches extracted STR entities to the KYC accounts registry 
-        using deterministic (tax/ID) and fuzzy (Soundex) logic.
+        using deterministic (tax/ID), phonetic (Soundex) and fuzzy string (Levenshtein) logic.
         """
-        logger.info("Matching and linking entities...")
+        logger.info("Matching and linking entities using enhanced phonetics + Levenshtein...")
         if extracted_entities_df.empty:
             logger.warning("No extracted entities provided to match.")
             return pd.DataFrame()
@@ -184,16 +185,16 @@ class AMLDataParser:
             str_first = str(row.get('first_name', '')).strip()
             str_last = str(row.get('last_name', '')).strip()
             str_tax = str(row.get('tax_number', '')).strip()
+            str_full_name = f"{str_first} {str_last}".strip()
             
             # 1. Direct Identifier Match (Priority)
             if str_tax:
-                # Ensure str_tax matches formatting of accounts_df['tax_number'] (string comparison)
                 str_tax_clean = str_tax.split('.')[0]
                 direct_match = self.accounts_df[self.accounts_df['tax_number'] == str_tax_clean]
                 if not direct_match.empty:
                     links.append({
                         'report_id': row['report_id'],
-                        'str_entity': f"{str_first} {str_last}".strip(),
+                        'str_entity': str_full_name,
                         'registry_id': direct_match.iloc[0]['account_id'],
                         'match_method': 'direct_identifier',
                         'confidence': 1.0,
@@ -201,7 +202,7 @@ class AMLDataParser:
                     })
                     continue
                 
-            # 2. Phonetic Name Match (Fallback)
+            # 2. Enhanced Phonetic + Fuzzy Match Pipeline
             phon_first = calculate_soundex(str_first)
             phon_last = calculate_soundex(str_last)
             
@@ -212,12 +213,19 @@ class AMLDataParser:
                 ]
                 
                 for _, match_row in phonetic_matches.iterrows():
+                    kyc_name = str(match_row['name']).strip()
+                    # Calculate Levenshtein similarity ratio between full names
+                    sim_ratio = Levenshtein.ratio(str_full_name.lower(), kyc_name.lower())
+                    
+                    # Confidence is scaling of phonetic match adjusted by name similarity
+                    confidence = 0.60 + 0.38 * sim_ratio
+                    
                     links.append({
                         'report_id': row['report_id'],
-                        'str_entity': f"{str_first} {str_last}".strip(),
+                        'str_entity': str_full_name,
                         'registry_id': match_row['account_id'],
-                        'match_method': 'phonetic_match',
-                        'confidence': 0.85,
+                        'match_method': 'phonetic_fuzzy_match',
+                        'confidence': round(confidence, 3),
                         'narrative': row['narrative']
                     })
                     
@@ -243,27 +251,33 @@ class NarrativeEvidenceVerifier:
         """Extracts claim types from text using keyword heuristics."""
         claims = []
         text = str(narrative_text).lower()
-        if re.search(r'cross-border|international|foreign|abroad', text):
+        if re.search(r'cross-border|international|foreign|abroad|overseas', text):
             claims.append('cross_border_activity')
-        if re.search(r'large|high value|huge|millions', text):
+        if re.search(r'large|high value|huge|millions|lakhs|heavy amount', text):
             claims.append('high_volume')
-        if re.search(r'rapid|quick|immediate|velocity', text):
+        if re.search(r'rapid|quick|immediate|velocity|fast|burst', text):
             claims.append('rapid_movement')
         return claims
         
     def verify_claim(self, claim_type: str, account_id, graph_engine) -> str:
         """Checks graph metrics to confirm or refute a claim."""
-        if account_id not in graph_engine.node_features:
+        account_id_str = str(account_id)
+        if account_id_str not in graph_engine.node_features:
             return "NOT_FOUND"
             
-        features = graph_engine.node_features[account_id]
+        features = graph_engine.node_features[account_id_str]
         
         if claim_type == 'cross_border_activity':
-            return "CONFIRMED" if features.get('comm_cb_ratio', 0) > 0 else "REFUTED"
+            # Check community risk indices or GNN embeddings
+            return "CONFIRMED" if (features.get('comm_cb_ratio', 0) > 0.05 or features.get('emb_tgat_0', 0) != 0) else "REFUTED"
         elif claim_type == 'high_volume':
-            return "CONFIRMED" if (features.get('in_volume', 0) + features.get('out_volume', 0)) > 5000000 else "REFUTED"
+            # Confirmation boundary: in+out volume > 1,000,000 NPR
+            in_vol = features.get('in_volume', 0.0)
+            out_vol = features.get('out_volume', 0.0)
+            return "CONFIRMED" if (in_vol + out_vol) > 1000000.0 else "REFUTED"
         elif claim_type == 'rapid_movement':
-            return "CONFIRMED" if features.get('hawkes_intensity', 0) > 0.5 else "REFUTED"
+            # Confirmation boundary: Hawkes process intensity > 0.3
+            return "CONFIRMED" if (features.get('hawkes_intensity', 0.0) > 0.3 or features.get('motif_cycle', 0) > 0) else "REFUTED"
             
         return "UNKNOWN"
         

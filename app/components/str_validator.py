@@ -42,9 +42,9 @@ def render_verification_view(report_id: str | int | None = None) -> pd.DataFrame
     status_col = _first_existing(filtered, ["status", "verification_status"])
     if status_col:
         status_counts = filtered[status_col].value_counts().rename_axis("status").reset_index(name="count")
-        st.dataframe(status_counts, use_container_width=True, hide_index=True)
+        st.dataframe(status_counts, width="stretch", hide_index=True)
 
-    st.dataframe(filtered.head(100), use_container_width=True, hide_index=True)
+    st.dataframe(filtered.head(100), width="stretch", hide_index=True)
     return filtered
 
 
