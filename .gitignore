@@ -7,6 +7,7 @@ data/STUDENT_DATASET/
 data/raw/
 *.csv
 *.xml
+data/processed/*.json
 !data/processed/.gitkeep
 
 # ----- Python -----
