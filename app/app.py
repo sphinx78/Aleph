@@ -22,6 +22,11 @@ import pandas as pd
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+current_dir = Path(__file__).resolve().parent
+
+# Remove script directory from sys.path to avoid name collision with app.py
+sys.path = [p for p in sys.path if p != str(current_dir)]
+
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
