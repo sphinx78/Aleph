@@ -98,7 +98,7 @@ def render_ego_graph(
         xaxis={"showgrid": False, "zeroline": False, "visible": False},
         yaxis={"showgrid": False, "zeroline": False, "visible": False},
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
     return fig
 
 

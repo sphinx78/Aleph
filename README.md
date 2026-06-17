@@ -58,9 +58,29 @@ Place the dataset files in `data/STUDENT_DATASET/`:
 # Run the full pipeline
 python main.py
 
+# Prepare dashboard outputs without model-training dependencies
+python main.py --no-train-model
+
 # Launch the interactive dashboard
 streamlit run app/app.py
 ```
+
+## DevB Deliverables
+
+DevB owns the analyst-facing risk and explanation layer:
+
+- `notebooks/01_eda_raw_analysis.ipynb` — exploratory analysis for raw transactions, account structure, labels, graph topology, and feature correlations
+- `src/ml_models.py` — XGBoost AML risk classifier with class imbalance handling, PR-AUC evaluation, risk-score export, and feature-importance reporting
+- `src/explainability.py` — SHAP attribution, risk-driver decomposition, counterfactual edge impact estimates, and evidence subgraph extraction
+- `app/app.py` — Streamlit analyst dashboard with risk queue, account deep-dive, money-flow graph, STR evidence, explanations, alerts, and model health
+- `main.py` — integration runner that writes dashboard-ready outputs to `data/processed/`
+
+Generated DevB outputs:
+
+- `data/processed/risk_scores.csv`
+- `data/processed/feature_importance.csv`
+- `data/processed/model_metrics.json`
+- `data/processed/shap_explanations.csv` after SHAP is run
 
 ## Project Structure
 
