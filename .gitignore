@@ -56,3 +56,9 @@ desktop.ini
 *.log
 *.zip
 *.tar.gz
+
+# ----- Documentation -----
+AI_ML_Hackathon_Guidelines.pdf
+Alephdivision.md
+documentation.md
+track_problem_statements.md
