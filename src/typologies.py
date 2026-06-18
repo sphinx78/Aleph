@@ -267,72 +267,115 @@ class TypologyDetector:
                                 'details': f"Accumulation-Spike-Disperse detected: {len(in_tx)} inbound inputs ({in_vol:,.0f} NPR) followed chronologically by {len(out_tx)} outbound outputs."
                             })
 
-    def detect_hawala_ghost_flows(self, time_window_sec=3600, amount_tolerance=0.05):
+    def detect_hawala_ghost_flows(self, time_window_sec=3600, amount_tolerance=0.05, max_alerts=500):
         """
         Coordinated Hawala/Hundi Ghost Flows.
         Finds synchronized cross-border value offsets without direct topological links.
+
+        Optimized amount-sorted binary search matching — avoids O(N²) nested loops and
+        solves the merge_asof logic bug where unrelated nearest-in-time transactions
+        blocked true matches.
         """
-        logger.info("Executing Hawala Ghost Flow coordination analysis...")
-        # Get all transactions
-        tx_records = []
-        for u, v, data in self.G.edges(data=True):
-            if data.get('relation') == 'SENDS':
-                tx_records.append({
-                    'sender': u,
-                    'receiver': v,
-                    'amount': data.get('amount', 0.0),
-                    'timestamp': data.get('timestamp'),
-                    'cross_border': data.get('cross_border', 0)
-                })
-                
+        logger.info("Executing Hawala Ghost Flow coordination analysis (amount-sorted search)...")
+        import bisect
+
+        # Collect SENDS edges into records
+        tx_records = [
+            {
+                'sender': u,
+                'receiver': v,
+                'amount': data.get('amount', 0.0),
+                'timestamp': data.get('timestamp'),
+                'cross_border': data.get('cross_border', 0)
+            }
+            for u, v, data in self.G.edges(data=True)
+            if data.get('relation') == 'SENDS'
+        ]
+
         df = pd.DataFrame(tx_records)
         if df.empty or 'timestamp' not in df.columns:
             return
-            
-        # Group by country/branch context if available
-        # Find cross-border transactions
+
+        df = df.dropna(subset=['timestamp'])
+        if df.empty:
+            return
+
+        df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+        df = df.dropna(subset=['timestamp'])
+
         cb_txs = df[df['cross_border'] == 1].copy()
         dom_txs = df[df['cross_border'] == 0].copy()
-        
-        # Look for parallel offsets:
-        # A domestic transaction S1 -> I1 in country A, and an offset transaction I2 -> R1 in country B
-        # occurring within 1 hour of each other, for similar amounts, with no direct edges between S1 and R1
-        for idx, row in cb_txs.iterrows():
-            amt = row['amount']
-            t_ref = row['timestamp']
-            
-            if pd.isna(t_ref):
+
+        if cb_txs.empty or dom_txs.empty:
+            return
+
+        # Sort domestic transactions by amount for binary search
+        dom_sorted = dom_txs.sort_values('amount').reset_index(drop=True)
+        dom_amounts = dom_sorted['amount'].values
+
+        alert_count = 0
+        for _, cb_row in cb_txs.iterrows():
+            if alert_count >= max_alerts:
+                break
+
+            cb_amt = cb_row['amount']
+            cb_ts = cb_row['timestamp']
+            cb_sender = cb_row['sender']
+            cb_receiver = cb_row['receiver']
+
+            # Amount bounds
+            min_amt = cb_amt * (1.0 - amount_tolerance)
+            max_amt = cb_amt * (1.0 + amount_tolerance)
+
+            # Find candidates by amount binary search
+            idx_start = bisect.bisect_left(dom_amounts, min_amt)
+            idx_end = bisect.bisect_right(dom_amounts, max_amt)
+
+            if idx_start >= idx_end:
                 continue
-                
-            # Search domestic transactions for matching offset
-            lower_amt = amt * (1.0 - amount_tolerance)
-            upper_amt = amt * (1.0 + amount_tolerance)
-            
-            offsets = dom_txs[
-                (dom_txs['amount'] >= lower_amt) & 
-                (dom_txs['amount'] <= upper_amt)
-            ]
-            
-            for _, offset_row in offsets.iterrows():
-                t_off = offset_row['timestamp']
-                if pd.notna(t_off):
-                    time_diff = abs((t_off - t_ref).total_seconds())
-                    if time_diff <= time_window_sec:
-                        # Verify they are topologically disconnected
-                        s1, r1 = row['sender'], offset_row['receiver']
-                        if not self.G.has_edge(s1, r1) and not self.G.has_edge(r1, s1):
-                            self.alerts.append({
-                                'account_id': s1,
-                                'typology': 'Hawala Ghost Flow',
-                                'confidence': 0.90,
-                                'details': f"Synchronized offset matching Hawala profile. Cross-border tx (Amt: {amt:,.0f} NPR) coordinated with domestic offset tx (Amt: {offset_row['amount']:,.0f} NPR) within {time_diff/60:.1f} minutes."
-                            })
-                            self.alerts.append({
-                                'account_id': r1,
-                                'typology': 'Hawala Ghost Flow',
-                                'confidence': 0.90,
-                                'details': f"Synchronized offset matching Hawala profile. Coordinated with cross-border transaction of {amt:,.0f} NPR."
-                            })
+
+            candidates = dom_sorted.iloc[idx_start:idx_end]
+
+            # Filter candidates by time window
+            time_diffs = (candidates['timestamp'] - cb_ts).abs().dt.total_seconds()
+            valid_candidates = candidates[time_diffs <= time_window_sec]
+
+            for _, dom_row in valid_candidates.iterrows():
+                if alert_count >= max_alerts:
+                    break
+
+                dom_sender = dom_row['sender']
+                dom_receiver = dom_row['receiver']
+                dom_amt = dom_row['amount']
+                dom_ts = dom_row['timestamp']
+
+                if cb_sender == dom_receiver:
+                    continue
+
+                # Graph connectivity check: no direct edge between sender and receiver in either direction
+                if not self.G.has_edge(cb_sender, dom_receiver) and not self.G.has_edge(dom_receiver, cb_sender):
+                    time_diff = abs((dom_ts - cb_ts).total_seconds())
+                    self.alerts.append({
+                        'account_id': cb_sender,
+                        'typology': 'Hawala Ghost Flow',
+                        'confidence': 0.90,
+                        'details': (
+                            f"Synchronized offset matching Hawala profile. "
+                            f"Cross-border tx (Amt: {cb_amt:,.0f} NPR) coordinated with "
+                            f"domestic offset tx (Amt: {dom_amt:,.0f} NPR) within "
+                            f"{time_diff/60:.1f} minutes."
+                        )
+                    })
+                    self.alerts.append({
+                        'account_id': dom_receiver,
+                        'typology': 'Hawala Ghost Flow',
+                        'confidence': 0.90,
+                        'details': (
+                            f"Synchronized offset matching Hawala profile. "
+                            f"Coordinated with cross-border transaction of {cb_amt:,.0f} NPR."
+                        )
+                    })
+                    alert_count += 2
 
     def detect_loan_back_cycles(self):
         """

@@ -49,9 +49,10 @@ _node_features_df: Optional[pd.DataFrame] = None
 _alerts_df: Optional[pd.DataFrame] = None
 _shap_explanations_df: Optional[pd.DataFrame] = None
 _str_verification_df: Optional[pd.DataFrame] = None
+_transactions_df: Optional[pd.DataFrame] = None
 
 def load_data():
-    global _risk_scores_df, _node_features_df, _alerts_df, _shap_explanations_df, _str_verification_df
+    global _risk_scores_df, _node_features_df, _alerts_df, _shap_explanations_df, _str_verification_df, _transactions_df
     
     # 1. Risk scores
     risk_path = PROCESSED_DIR / "risk_scores.csv"
@@ -60,6 +61,8 @@ def load_data():
         # Normalize and construct columns if missing
         if "account_id" not in df.columns:
             df.insert(0, "account_id", df.index.astype(str))
+        else:
+            df["account_id"] = df["account_id"].astype(str)
         df["risk_score"] = df["risk_score"].astype(float).clip(0, 1)
         if "risk_percentile" not in df.columns:
             df["risk_percentile"] = (df["risk_score"].rank(pct=True) * 100).round(2)
@@ -80,7 +83,10 @@ def load_data():
     # 2. Node features
     features_path = PROCESSED_DIR / "node_features.csv"
     if features_path.exists():
-        _node_features_df = pd.read_csv(features_path)
+        df = pd.read_csv(features_path)
+        if "account_id" in df.columns:
+            df["account_id"] = df["account_id"].astype(str)
+        _node_features_df = df
     else:
         logger.warning("node_features.csv not found")
         _node_features_df = pd.DataFrame()
@@ -88,7 +94,10 @@ def load_data():
     # 3. Alerts
     alerts_path = PROCESSED_DIR / "alerts.csv"
     if alerts_path.exists():
-        _alerts_df = pd.read_csv(alerts_path)
+        df = pd.read_csv(alerts_path)
+        if "account_id" in df.columns:
+            df["account_id"] = df["account_id"].astype(str)
+        _alerts_df = df
     else:
         logger.warning("alerts.csv not found")
         _alerts_df = pd.DataFrame()
@@ -96,7 +105,10 @@ def load_data():
     # 4. SHAP
     shap_path = PROCESSED_DIR / "shap_explanations.csv"
     if shap_path.exists():
-        _shap_explanations_df = pd.read_csv(shap_path)
+        df = pd.read_csv(shap_path)
+        if "account_id" in df.columns:
+            df["account_id"] = df["account_id"].astype(str)
+        _shap_explanations_df = df
     else:
         logger.warning("shap_explanations.csv not found")
         _shap_explanations_df = pd.DataFrame()
@@ -104,15 +116,37 @@ def load_data():
     # 5. STR claims verification
     v_path = PROCESSED_DIR / "str_verification.csv"
     if v_path.exists():
-        _str_verification_df = pd.read_csv(v_path)
+        df = pd.read_csv(v_path)
+        if "account_id" in df.columns:
+            df["account_id"] = df["account_id"].astype(str)
+        _str_verification_df = df
     else:
         # Check alternatives
         alt_path = PROCESSED_DIR / "verification_matrix.csv"
         if alt_path.exists():
-            _str_verification_df = pd.read_csv(alt_path)
+            df = pd.read_csv(alt_path)
+            if "account_id" in df.columns:
+                df["account_id"] = df["account_id"].astype(str)
+            _str_verification_df = df
         else:
             logger.warning("str_verification.csv not found")
             _str_verification_df = pd.DataFrame()
+
+    # 6. Raw transactions
+    if RAW_TRANSACTIONS_PATH.exists():
+        try:
+            logger.info("Loading raw transactions into memory for fast querying...")
+            df = pd.read_csv(RAW_TRANSACTIONS_PATH)
+            df["Sender_account"] = df["Sender_account"].astype(str)
+            df["Receiver_account"] = df["Receiver_account"].astype(str)
+            _transactions_df = df
+            logger.info(f"Loaded {len(_transactions_df)} transactions successfully.")
+        except Exception as exc:
+            logger.error(f"Failed to load raw transactions: {exc}")
+            _transactions_df = pd.DataFrame()
+    else:
+        logger.warning("transactions.csv not found in raw directory")
+        _transactions_df = pd.DataFrame()
 
 # Initial loading
 load_data()
@@ -240,75 +274,62 @@ def get_account_claims_verification(account_id: str):
         
     return res_list
 
+
 @app.get("/accounts/{account_id}/transactions")
 def get_account_transactions(account_id: str, limit: int = 100):
     """
     Retrieves transaction connections for the account.
     Builds a path representation for the selected account (Multi-hop alluvial flow data).
     """
-    if not RAW_TRANSACTIONS_PATH.exists():
+    account = str(account_id)
+
+    if _transactions_df is None or _transactions_df.empty:
         # Return mock path data if raw data is missing
         return [
-            {"account_id": account_id, "amount": 1200000},
-            {"account_id": f"{account_id[:-2]}81", "amount": 1195000},
-            {"account_id": f"{account_id[:-2]}24", "amount": 1180000}
+            {"account_id": account, "amount": 1200000},
+            {"account_id": f"{account[:-2]}81" if len(account) > 2 else "9156675581", "amount": 1195000},
+            {"account_id": f"{account[:-2]}24" if len(account) > 2 else "9156675524", "amount": 1180000}
         ]
-        
-    account = str(account_id)
-    chunks = []
-    # Read raw transactions in chunks to find matches
-    try:
-        for chunk in pd.read_csv(RAW_TRANSACTIONS_PATH, chunksize=100_000):
-            mask = (chunk["Sender_account"].astype(str) == account) | (
-                chunk["Receiver_account"].astype(str) == account
-            )
-            if mask.any():
-                chunks.append(chunk.loc[mask])
-            if sum(len(part) for part in chunks) >= limit:
-                break
-    except Exception as exc:
-        logger.error(f"Error loading transactions from CSV: {exc}")
-        
-    if not chunks:
+
+    # Filter transactions involving the account from the in-memory dataframe
+    mask = (_transactions_df["Sender_account"] == account) | (_transactions_df["Receiver_account"] == account)
+    tx_df = _transactions_df[mask].head(limit)
+
+    if tx_df.empty:
         # Fallback to simulated path data
         return [
             {"account_id": account, "amount": 1200000},
             {"account_id": f"{account[:-2]}81" if len(account) > 2 else "9156675581", "amount": 1195000},
             {"account_id": f"{account[:-2]}24" if len(account) > 2 else "9156675524", "amount": 1180000}
         ]
-        
-    tx_df = pd.concat(chunks, ignore_index=True).head(limit)
-    
-    # To construct a sequential layering alluvial flow, we trace downstream transfers:
-    # We find transactions where account is sender. We select the largest outbound transaction.
-    # Then from that receiver, we select their largest outbound transaction, etc. (up to 3 hops).
+
     path = []
     current_acc = account
     current_amt = 1200000 # default starter amount if not found
-    
+
     # Try to find initial incoming or outgoing amount to make it realistic
-    matching_txs = tx_df[(tx_df["Sender_account"].astype(str) == current_acc) | (tx_df["Receiver_account"].astype(str) == current_acc)]
+    matching_txs = tx_df[(tx_df["Sender_account"] == current_acc) | (tx_df["Receiver_account"] == current_acc)]
     if not matching_txs.empty:
-        current_amt = float(matching_txs.iloc[0].get("amount_local_npr", 1200000))
+        sort_col = "amount_local_npr" if "amount_local_npr" in tx_df.columns else "Amount"
+        current_amt = float(matching_txs.iloc[0].get(sort_col, 1200000))
 
     path.append({"account_id": current_acc, "amount": int(current_amt)})
-    
+
     # Trace downstream hop 1
     # Search for transactions where current_acc sent money
-    out_1 = tx_df[tx_df["Sender_account"].astype(str) == current_acc]
+    out_1 = tx_df[tx_df["Sender_account"] == current_acc]
     if not out_1.empty:
-        largest_1 = out_1.sort_values("amount_local_npr", ascending=False).iloc[0]
+        sort_col = "amount_local_npr" if "amount_local_npr" in tx_df.columns else "Amount"
+        largest_1 = out_1.sort_values(sort_col, ascending=False).iloc[0]
         next_acc = str(largest_1["Receiver_account"])
-        next_amt = float(largest_1["amount_local_npr"])
+        next_amt = float(largest_1[sort_col])
         path.append({"account_id": next_acc, "amount": int(next_amt)})
-        
+
         # Trace hop 2: Look for transactions where next_acc sent money
-        # Since our local tx_df only loaded direct neighbors of main account, we might need to search in general or simulate.
-        # Let's see if we can find in tx_df (if it covers it) or simulate a slight conservation decay.
-        out_2 = tx_df[tx_df["Sender_account"].astype(str) == next_acc]
+        out_2 = tx_df[tx_df["Sender_account"] == next_acc]
         if not out_2.empty:
-            largest_2 = out_2.sort_values("amount_local_npr", ascending=False).iloc[0]
-            path.append({"account_id": str(largest_2["Receiver_account"]), "amount": int(largest_2["amount_local_npr"])})
+            largest_2 = out_2.sort_values(sort_col, ascending=False).iloc[0]
+            path.append({"account_id": str(largest_2["Receiver_account"]), "amount": int(largest_2[sort_col])})
         else:
             # Simulate decay (conservation rate 98.5%)
             path.append({"account_id": f"{next_acc[:-2]}24" if len(next_acc) > 2 else "9156675524", "amount": int(next_amt * 0.985)})
@@ -318,7 +339,7 @@ def get_account_transactions(account_id: str, limit: int = 100):
         next_acc = f"{current_acc[:-2]}81" if len(current_acc) > 2 else "9156675581"
         path.append({"account_id": next_acc, "amount": int(next_amt)})
         path.append({"account_id": f"{next_acc[:-2]}24" if len(next_acc) > 2 else "9156675524", "amount": int(next_amt * 0.985)})
-        
+
     return path
 
 @app.get("/accounts/{account_id}/copilot")
