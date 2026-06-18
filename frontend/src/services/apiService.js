@@ -1,4 +1,6 @@
-const API_URL = 'http://localhost:8000';
+// In development: Vite proxies /api -> http://127.0.0.1:8000 (see vite.config.js)
+// In production: set VITE_API_URL env var or deploy behind the same origin
+const API_URL = import.meta.env.VITE_API_URL ?? '/api';
 
 export async function fetchHighRiskAccounts() {
   try {
@@ -89,5 +91,17 @@ export async function fetchTypologyAlerts() {
   } catch (error) {
     console.error("Typology alerts fetch failure:", error);
     throw error;
+  }
+}
+export async function fetchHealthStatus() {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    const response = await fetch(`${API_URL}/health`, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (!response.ok) return { status: 'degraded', version: '?' };
+    return await response.json();
+  } catch {
+    return { status: 'offline', version: '?' };
   }
 }
