@@ -164,19 +164,14 @@ export default function GlobeLanding({ onEnter }) {
   }, []); // Empty deps — loop runs entirely via refs, no restarts
 
   return (
-    <div className="fixed inset-0 bg-[#FAF7F2] z-50 flex flex-col justify-center items-center font-sans">
+    <div className="fixed inset-0 bg-[#FAF7F2] z-50 flex flex-col justify-center items-center font-sans overflow-hidden">
       {/* Header copy */}
-      <div className="text-center mb-8 max-w-xl px-6 animate-fade-up">
-        <span className="text-xs uppercase tracking-[0.22em] text-[#C07A50] font-bold">
-          Operational Security Engine
-        </span>
-        <h1 className="text-4xl font-serif text-[#2D2D2D] mt-3 mb-4 font-semibold tracking-tight leading-tight">
-          AMLIOS-X System Platform
+      <div className="text-center mb-8 max-w-2xl px-6 animate-fade-up">
+        <h1 className="text-3xl font-serif text-[#2D2D2D] mt-3 mb-4 font-semibold tracking-tight leading-tight">
+          ALEPH: Anti-Money Laundering Intelligence Operating System
         </h1>
-        <p className="text-sm text-[#6B6864] font-light leading-relaxed">
-          Financial intelligence interface utilizing temporal graphs,<br />
-          unsupervised community detection, and explainable ML to isolate<br />
-          structured laundering operations across the transaction network.
+        <p className="text-sm text-[#6B6864] font-light leading-relaxed max-w-lg mx-auto">
+          Financial intelligence interface utilizing temporal graphs, unsupervised community detection, and explainable ML to isolate structured laundering operations across the transaction network.
         </p>
       </div>
 
@@ -196,14 +191,14 @@ export default function GlobeLanding({ onEnter }) {
         className="mt-8 px-8 py-3.5 border border-[#EAE1D4] text-[#2D2D2D] bg-white
           hover:bg-[#2D2D2D] hover:text-white hover:border-[#2D2D2D]
           rounded-full text-xs font-semibold tracking-widest uppercase
-          transition-all duration-300 shadow-sm"
+          transition-all duration-300 shadow-sm cursor-pointer z-10"
       >
         Initialize System Analytics
       </button>
 
       {/* Subtle footer descriptor */}
       <p className="mt-5 text-[10px] uppercase tracking-[0.2em] text-[#D6C8B5] font-semibold">
-        Track 3 · Graph Intelligence · v3.1.2
+        ALEPH Operations Hub · v3.1.2
       </p>
     </div>
   );
