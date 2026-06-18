@@ -1,5 +1,5 @@
 """
-AMLIOS-X Risk Fusion & Contagion Propagation Module
+ALEPH Risk Fusion & Contagion Propagation Module
 
 Implements:
 1. Dempster-Shafer Evidence Fusion combining:

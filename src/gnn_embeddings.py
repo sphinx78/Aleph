@@ -1,5 +1,5 @@
 """
-AMLIOS-X Graph Embeddings Module
+ALEPH Graph Embeddings Module
 
 Implements:
 1. DeepWalk/Node2Vec: Matrix Factorization (NetMF SVD approximation) of transition probabilities.
