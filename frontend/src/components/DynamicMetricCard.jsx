@@ -21,13 +21,13 @@ export default function DynamicMetricCard({ children, title, uppercaseSub, value
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="relative overflow-hidden bg-white rounded-xl border border-[#EAE1D4] p-6 transition-all duration-300 hover:shadow-md group"
+      className="relative overflow-hidden bg-white/75 backdrop-blur-md rounded-xl border border-[#EAE1D4] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 group"
     >
       {/* Interactive cursor tracking gradient background */}
       <div 
         className="absolute inset-0 pointer-events-none transition-opacity duration-300 opacity-0 group-hover:opacity-100"
         style={{
-          background: `radial-gradient(180px circle at ${coords.x}px ${coords.y}px, rgba(153, 178, 155, 0.08), transparent 80%)`
+          background: `radial-gradient(240px circle at ${coords.x}px ${coords.y}px, rgba(153, 178, 155, 0.15), transparent 80%)`
         }}
       />
 

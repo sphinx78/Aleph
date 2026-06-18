@@ -3,6 +3,7 @@ import WorkspaceShell from './WorkspaceShell';
 import DynamicMetricCard from './DynamicMetricCard';
 import LayeringAlluvial from './LayeringAlluvial';
 import ClaimsVerification from './ClaimsVerification';
+import AlephCard from './AlephCard';
 import { 
   fetchHighRiskAccounts, 
   fetchAccountFeatures, 
@@ -184,7 +185,7 @@ export default function DashboardMain() {
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
             
             {/* Action Queue Control & Table */}
-            <div className="xl:col-span-2 bg-white border border-[#EAE1D4] rounded-xl p-8 flex flex-col h-[520px]">
+            <AlephCard className="xl:col-span-2 p-8 flex flex-col h-[520px]">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                 <div>
                   <h3 className="text-lg font-serif font-bold text-[#2D2D2D]">High-Risk Analyst Action Queue</h3>
@@ -285,10 +286,10 @@ export default function DashboardMain() {
                   </tbody>
                 </table>
               </div>
-            </div>
+            </AlephCard>
 
             {/* Entity Deep-Dive Panel */}
-            <div className="bg-white border border-[#EAE1D4] rounded-xl p-8 h-[520px] flex flex-col justify-between">
+            <AlephCard className="p-8 h-[520px] flex flex-col justify-between">
               <div>
                 <span className="text-[9px] uppercase tracking-[0.2em] text-[#C07A50] font-bold">
                   Deep-Dive Analyst Panel
@@ -358,7 +359,7 @@ export default function DashboardMain() {
                 <span>Max Risk: <strong>{maxRisk.toFixed(3)}</strong></span>
                 <span>Critical alerts: <strong className="text-red-600">{criticalCount}</strong></span>
               </div>
-            </div>
+            </AlephCard>
 
           </div>
 
@@ -377,7 +378,7 @@ export default function DashboardMain() {
 
       {/* Typology Alerts Layer */}
       {activeSection === 'typology' && (
-        <div className="bg-white border border-[#EAE1D4] rounded-xl p-8">
+        <AlephCard className="p-8">
           <div className="mb-6">
             <h3 className="text-xl font-serif font-bold text-[#2D2D2D]">Flagged Typology Alerts Registry</h3>
             <p className="text-xs text-[#6B6864] font-light mt-0.5">Identified suspicious behaviors matching rule-based templates.</p>
@@ -422,7 +423,7 @@ export default function DashboardMain() {
               </tbody>
             </table>
           </div>
-        </div>
+        </AlephCard>
       )}
 
       {/* Explainability Hub */}
@@ -430,7 +431,7 @@ export default function DashboardMain() {
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-10">
           
           {/* SHAP Attributions (Left 2 columns) */}
-          <div className="xl:col-span-2 bg-white border border-[#EAE1D4] rounded-xl p-8 flex flex-col h-[560px]">
+          <AlephCard className="xl:col-span-2 p-8 flex flex-col h-[560px]">
             <div className="mb-6">
               <span className="text-[9px] uppercase tracking-[0.2em] text-[#C07A50] font-bold">Explainable Machine Learning</span>
               <h3 className="text-xl font-serif font-bold text-[#2D2D2D] mt-0.5">SHAP Feature Attributions</h3>
@@ -466,7 +467,7 @@ export default function DashboardMain() {
                       </div>
                       <div className="w-full bg-[#FAF7F2] h-2 rounded-full relative overflow-hidden">
                         <div 
-                          className={`h-full rounded-full absolute ${isPositive ? 'bg-[#99B29B] left-1/2' : 'bg-red-400 right-1/2'}`}
+                           className={`h-full rounded-full absolute ${isPositive ? 'bg-[#99B29B] left-1/2' : 'bg-red-400 right-1/2'}`}
                           style={{ 
                             width: `${absPercent / 2}%`,
                           }}
@@ -481,10 +482,10 @@ export default function DashboardMain() {
                 No SHAP attributions found for this account. Make sure model is trained.
               </div>
             )}
-          </div>
+          </AlephCard>
 
           {/* Copilot Report (Right 3 columns) */}
-          <div className="xl:col-span-3 bg-white border border-[#EAE1D4] rounded-xl p-8 flex flex-col h-[560px] justify-between">
+          <AlephCard className="xl:col-span-3 p-8 flex flex-col h-[560px] justify-between">
             <div>
               <div className="flex justify-between items-start mb-6">
                 <div>
@@ -498,13 +499,13 @@ export default function DashboardMain() {
                     onClick={copyToClipboard}
                     className="px-3.5 py-2 border border-[#EAE1D4] text-[#2D2D2D] hover:bg-[#FAF7F2] rounded-lg text-[10px] font-semibold uppercase tracking-wider transition-all"
                   >
-                    {copiedCopilot ? 'Copied!' : 'Copy Dossier'}
+                    {copiedCopilot ? 'Copied!' : 'Copy Report'}
                   </button>
                   <button 
                     onClick={handleDownloadReport}
                     className="px-3.5 py-2 bg-[#2D2D2D] text-white hover:bg-black rounded-lg text-[10px] font-semibold uppercase tracking-wider transition-all shadow-sm"
                   >
-                    📥 Download SAR File
+                    📥 Export SAR
                   </button>
                 </div>
               </div>
@@ -522,7 +523,7 @@ export default function DashboardMain() {
                 />
               )}
             </div>
-          </div>
+          </AlephCard>
 
         </div>
       )}
@@ -531,7 +532,7 @@ export default function DashboardMain() {
       {activeSection === 'str-alignment' && (
         <div className="space-y-10">
           
-          <div className="bg-white border border-[#EAE1D4] rounded-xl p-8">
+          <AlephCard className="p-8">
             <div className="mb-6">
               <h3 className="text-xl font-serif font-bold text-[#2D2D2D]">STR Claims Narrative Verification Dashboard</h3>
               <p className="text-xs text-[#6B6864] font-light mt-0.5">Validating legal report testimonies against computed multi-hop transfer pathways.</p>
@@ -550,7 +551,7 @@ export default function DashboardMain() {
                     {claims.map((claim, idx) => (
                       <div key={idx} className="p-4 border border-[#EAE1D4] rounded-lg">
                         <div className="flex justify-between items-start">
-                          <h5 className="text-xs font-bold font-mono text-[#2D2D2D]">{claim.text}</h5>
+                           <h5 className="text-xs font-bold font-mono text-[#2D2D2D]">{claim.text}</h5>
                           <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase ${
                             claim.status === 'CONFIRMED' || claim.status === 'VERIFIED' ? 'bg-[#99B29B]/15 text-[#99B29B]' : 'bg-red-100 text-red-700'
                           }`}>
@@ -594,7 +595,7 @@ export default function DashboardMain() {
             ) : (
               <p className="text-xs text-[#6B6864] italic py-10 text-center">No active narrative claims found linking this entity.</p>
             )}
-          </div>
+          </AlephCard>
           
         </div>
       )}

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
+import AlephCard from './AlephCard';
 
 export default function LayeringAlluvial({ pathData }) {
   const svgRef = useRef();
@@ -95,7 +96,7 @@ export default function LayeringAlluvial({ pathData }) {
   }, [pathData]);
 
   return (
-    <div className="bg-white border border-[#EAE1D4] rounded-xl p-6">
+    <AlephCard className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
           <span className="text-[9px] uppercase tracking-[0.2em] text-[#C07A50] font-bold">
@@ -112,6 +113,6 @@ export default function LayeringAlluvial({ pathData }) {
       <div className="overflow-x-auto">
         <svg ref={svgRef} width="880" height="180" />
       </div>
-    </div>
+    </AlephCard>
   );
 }

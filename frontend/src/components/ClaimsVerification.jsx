@@ -1,10 +1,11 @@
 import React from 'react';
 import { CheckCircle2, XCircle } from 'lucide-react';
+import AlephCard from './AlephCard';
 
 export default function ClaimsVerification({ claimsList }) {
   if (!claimsList || claimsList.length === 0) {
     return (
-      <div className="bg-white border border-[#EAE1D4] rounded-xl p-6">
+      <AlephCard className="p-6">
         <div className="mb-6">
           <span className="text-[9px] uppercase tracking-[0.2em] text-[#C07A50] font-bold">
             Verification Systems
@@ -14,12 +15,12 @@ export default function ClaimsVerification({ claimsList }) {
           </h4>
         </div>
         <p className="text-xs text-[#6B6864] italic">No active narrative claims found linking this entity.</p>
-      </div>
+      </AlephCard>
     );
   }
 
   return (
-    <div className="bg-white border border-[#EAE1D4] rounded-xl p-6">
+    <AlephCard className="p-6">
       <div className="mb-6">
         <span className="text-[9px] uppercase tracking-[0.2em] text-[#C07A50] font-bold">
           Verification Systems
@@ -67,6 +68,6 @@ export default function ClaimsVerification({ claimsList }) {
           );
         })}
       </div>
-    </div>
+    </AlephCard>
   );
 }
