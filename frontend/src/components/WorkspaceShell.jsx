@@ -43,10 +43,10 @@ export default function WorkspaceShell({ activeSection, setActiveSection, childr
           <div className="mb-12">
             <div className="flex items-center space-x-2.5">
               <span className="w-3.5 h-3.5 bg-[#99B29B] rounded-sm transform rotate-45 shadow-sm" />
-              <h2 className="text-xl font-serif font-bold tracking-tight text-[#2D2D2D]">AMLIOS-X</h2>
+              <h2 className="text-xl font-serif font-bold tracking-tight text-[#2D2D2D]">ALEPH</h2>
             </div>
-            <p className="text-[9px] uppercase tracking-[0.25em] text-[#6B6864] font-semibold mt-1.5">
-              Track 3 · Graph Intelligence
+            <p className="text-[9px] uppercase tracking-[0.2em] text-[#6B6864] font-bold mt-2">
+              AML Intelligence Platform
             </p>
           </div>
 
@@ -60,9 +60,9 @@ export default function WorkspaceShell({ activeSection, setActiveSection, childr
                   key={item.id}
                   onClick={() => setActiveSection(item.id)}
                   className={`w-full flex items-center space-x-3.5 px-4 py-3 rounded-lg text-xs font-semibold
-                    tracking-wider uppercase transition-all duration-200 ${
+                    tracking-wider uppercase transition-all duration-200 hover:translate-x-1.5 ${
                     isActive
-                      ? 'bg-[#99B29B] text-white shadow-sm'
+                      ? 'bg-[#99B29B] text-white shadow-sm hover:translate-x-0'
                       : 'text-[#6B6864] hover:bg-[#FAF7F2] hover:text-[#2D2D2D]'
                   }`}
                 >

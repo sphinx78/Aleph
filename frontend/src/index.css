@@ -93,3 +93,18 @@ input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   margin-top: -4px;
 }
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #FAF7F2 25%, #EAE1D4 37%, #FAF7F2 63%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
