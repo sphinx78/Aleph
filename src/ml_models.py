@@ -126,7 +126,12 @@ class AMLRiskClassifier:
         from sklearn.preprocessing import OneHotEncoder
         from xgboost import XGBClassifier
 
-        data = features_df.copy() if features_df is not None else self.load_features()
+        if features_df is not None:
+            data = features_df.copy()
+            data = self._attach_account_labels_if_needed(data)
+        else:
+            data = self.load_features()
+
         data = self._normalize_target(data)
         self.training_frame_ = data.copy()
 
@@ -410,7 +415,12 @@ class AMLRiskClassifier:
 
         labels = self._aggregate_transaction_features(pd.read_csv(raw_ml_features))
         labels = labels[["account_id", "is_suspicious"]]
-        return df.merge(labels, left_on=account_id_col, right_on="account_id", how="left").fillna({"is_suspicious": 0})
+        
+        df_copy = df.copy()
+        df_copy[account_id_col] = df_copy[account_id_col].astype(str)
+        labels["account_id"] = labels["account_id"].astype(str)
+        
+        return df_copy.merge(labels, left_on=account_id_col, right_on="account_id", how="left").fillna({"is_suspicious": 0})
 
     def _normalize_target(self, df: pd.DataFrame) -> pd.DataFrame:
         target = self._find_first_existing(df, self.TARGET_CANDIDATES)
