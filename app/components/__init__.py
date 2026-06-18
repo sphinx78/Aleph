@@ -1,3 +1,3 @@
 """
-AMLIOS-X Dashboard Components Package
+ALEPH Dashboard Components Package
 """

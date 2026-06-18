@@ -1,5 +1,5 @@
 """
-AMLIOS-X Data Loader Module
+ALEPH Data Loader Module
 
 Handles:
 - Loading CSV datasets (transactions, accounts, graph edges, ML features)

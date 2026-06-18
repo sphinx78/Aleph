@@ -1,6 +1,4 @@
-# ===========================
-# AMLIOS-X Dependencies
-# ===========================
+# ALEPH Dependencies
 
 # Core Data Processing
 pandas>=2.0

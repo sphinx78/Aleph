@@ -1,5 +1,5 @@
 """
-AMLIOS-X Graph Engine Module
+ALEPH Graph Engine Module
 
 Handles:
 - Building continuous-time directed heterogeneous multigraph from transaction data

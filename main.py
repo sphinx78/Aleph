@@ -1,5 +1,5 @@
 """
-AMLIOS-X System Orchestration Pipeline
+ALEPH System Orchestration Pipeline
 
 Integrates and coordinates the execution of all 14 layers:
 1. Unified Knowledge Graph & Whitelisting (Layer 1)
@@ -44,8 +44,8 @@ PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
 
 
 def run_full_mesh_pipeline(train_model: bool = True) -> dict[str, Any]:
-    """Runs the 14-layer AMLIOS-X system end-to-end and returns metrics."""
-    logger.info("Initializing AMLIOS-X 14-Layer Bidirectional Evidence Mesh...")
+    """Runs the 14-layer ALEPH system end-to-end and returns metrics."""
+    logger.info("Initializing ALEPH 14-Layer Bidirectional Evidence Mesh...")
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
     
     # --------------------------------------------------------------------------
@@ -167,7 +167,7 @@ def run_full_mesh_pipeline(train_model: bool = True) -> dict[str, Any]:
     metrics_path = PROCESSED_DIR / "model_metrics.json"
     metrics_path.write_text(json.dumps(summary, indent=2, sort_keys=True))
     
-    logger.info("AMLIOS-X 14-Layer End-to-End pipeline executed successfully!")
+    logger.info("ALEPH 14-Layer End-to-End pipeline executed successfully!")
     return summary
 
 
@@ -228,7 +228,7 @@ def _generate_mock_shap(features: pd.DataFrame, output_path: Path) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run the AMLIOS-X 14-Layer Pipeline.")
+    parser = argparse.ArgumentParser(description="Run the ALEPH 14-Layer Pipeline.")
     parser.add_argument(
         "--no-train-model",
         action="store_true",

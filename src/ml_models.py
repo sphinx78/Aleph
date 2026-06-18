@@ -1,5 +1,5 @@
 """
-AMLIOS-X Machine Learning Models Module
+ALEPH Machine Learning Models Module
 
 Handles:
 - XGBoost risk classification with class imbalance handling

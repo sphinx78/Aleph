@@ -1,5 +1,5 @@
 """
-AMLIOS-X Utilities Module
+ALEPH Utilities Module
 
 Handles:
 - Logging configuration
@@ -21,7 +21,7 @@ REPORTS_DIR = RAW_DATA_DIR / "reports"
 # Ensure directories exist
 os.makedirs(PROCESSED_DATA_DIR, exist_ok=True)
 
-def setup_logger(name="AMLIOS_X"):
+def setup_logger(name="ALEPH"):
     """Configures and returns a logger instance."""
     logger = logging.getLogger(name)
     if not logger.handlers:

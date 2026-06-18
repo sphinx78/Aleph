@@ -1,5 +1,5 @@
 """
-AMLIOS-X Streamlit Dashboard — Main Entry Point
+ALEPH Streamlit Dashboard — Main Entry Point
 
 Launch with: streamlit run app/app.py
 
@@ -47,14 +47,14 @@ def main() -> None:
     import streamlit as st
 
     st.set_page_config(
-        page_title="AMLIOS-X Analyst Operating System",
+        page_title="ALEPH - Anti-Money Laundering Intelligence Operating System",
         page_icon="🔮",
         layout="wide",
         initial_sidebar_state="expanded",
     )
     _inject_css(st)
 
-    st.title("AMLIOS-X Anti-Money Laundering Intelligence Operating System")
+    st.title("ALEPH - Anti-Money Laundering Intelligence Operating System")
     st.markdown("---")
 
     risk_scores = load_risk_scores()
@@ -246,7 +246,7 @@ def main() -> None:
         with col1:
             st.markdown("#### Persistence Homology (Betti-0 Barcode)")
             st.markdown(
-                "AMLIOS-X filters transactions by amount threshold to compute Betti-0 components. "
+                "ALEPH filters transactions by amount threshold to compute Betti-0 components. "
                 "Robust laundering pipelines persist across multiple thresholds, indicating continuous flow."
             )
             

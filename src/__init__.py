@@ -1,5 +1,5 @@
 """
-AMLIOS-X: Anti-Money Laundering Intelligence Operating System — eXtended
+ALEPH: Anti-Money Laundering Intelligence Operating System
 Source package initialization.
 """
 

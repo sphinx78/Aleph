@@ -1,5 +1,5 @@
 """
-AMLIOS-X Analyst Copilot Module
+ALEPH Analyst Copilot Module
 
 Integrates local LLM APIs (Ollama) with fallback template engines to:
 - Auto-generate legal-grade Suspicious Activity Reports (SAR)
@@ -101,7 +101,7 @@ RISK RATING: {risk_band} (Score: {risk_score:.3f} | Rank: #{rank})
 --------------------------------------------------------------------------------
 
 1. EXECUTIVE SUMMARY:
-   Account {acc_id} has been flagged for critical suspicion by the AMLIOS-X multi-layer
+   Account {acc_id} has been flagged for critical suspicion by the ALEPH multi-layer
    knowledge mesh. The account exhibits anomalous flow behaviors with a total inbound
    volume of {in_vol:,.2f} NPR and outbound volume of {out_vol:,.2f} NPR, presenting a
    flow ratio of {out_vol/(in_vol+1e-5):.2f}. Fused risk metrics place this entity in the

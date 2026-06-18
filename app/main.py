@@ -1,5 +1,5 @@
 """
-AMLIOS-X FastAPI Core Engine Backend Server
+ALEPH FastAPI Core Engine Backend Server
 """
 
 from __future__ import annotations
@@ -26,9 +26,9 @@ from src.copilot import AnalystCopilot
 from src.explainability import ExplainabilityEngine
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("AMLIOS-X-API")
+logger = logging.getLogger("ALEPH-API")
 
-app = FastAPI(title="AMLIOS-X Core Engine", version="3.1")
+app = FastAPI(title="ALEPH Core Engine", version="3.1")
 
 # Configure CORS for React frontend (default Vite port is 5173)
 app.add_middleware(

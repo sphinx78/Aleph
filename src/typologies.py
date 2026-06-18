@@ -1,5 +1,5 @@
 """
-AMLIOS-X Typology Detection Module
+ALEPH Typology Detection Module
 
 Implements actual graph search and pattern-matching algorithms:
 - Temporal DFS layering chain discovery

@@ -1,3 +1,3 @@
 """
-AMLIOS-X Test Suite Package
+ALEPH Test Suite Package
 """

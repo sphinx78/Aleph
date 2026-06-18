@@ -1,5 +1,5 @@
 """
-AMLIOS-X Explainability Module
+ALEPH Explainability Module
 
 Handles:
 - SHAP TreeExplainer attributions for XGBoost risk model
