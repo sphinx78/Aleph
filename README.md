@@ -1,7 +1,7 @@
-# AMLIOS-X: Anti-Money Laundering Intelligence Operating System — eXtended
+# AMLIOS-X: Anti-Money Laundering Intelligence Operating System
 
-**Track 3: Network & Graph Intelligence**  
-AI/ML Intelligence Hackathon 2025
+**AI/ML Intelligence Hackathon 2026**  
+Track 3: Network & Graph Intelligence
 
 ---
 
@@ -58,29 +58,21 @@ Place the dataset files in `data/STUDENT_DATASET/`:
 # Run the full pipeline
 python main.py
 
-# Prepare dashboard outputs without model-training dependencies
+# Prepare dashboard outputs without model-training dependencies (fast run)
 python main.py --no-train-model
 
-# Launch the interactive dashboard
+# Launch the FastAPI backend
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+
+# Launch the React + Vite frontend
+cd frontend
+npm install
+npm run dev
+
+# (Legacy) Launch the Streamlit dashboard
 streamlit run app/app.py
 ```
 
-## DevB Deliverables
-
-DevB owns the analyst-facing risk and explanation layer:
-
-- `notebooks/01_eda_raw_analysis.ipynb` — exploratory analysis for raw transactions, account structure, labels, graph topology, and feature correlations
-- `src/ml_models.py` — XGBoost AML risk classifier with class imbalance handling, PR-AUC evaluation, risk-score export, and feature-importance reporting
-- `src/explainability.py` — SHAP attribution, risk-driver decomposition, counterfactual edge impact estimates, and evidence subgraph extraction
-- `app/app.py` — Streamlit analyst dashboard with risk queue, account deep-dive, money-flow graph, STR evidence, explanations, alerts, and model health
-- `main.py` — integration runner that writes dashboard-ready outputs to `data/processed/`
-
-Generated DevB outputs:
-
-- `data/processed/risk_scores.csv`
-- `data/processed/feature_importance.csv`
-- `data/processed/model_metrics.json`
-- `data/processed/shap_explanations.csv` after SHAP is run
 
 ## Project Structure
 
@@ -107,10 +99,32 @@ Generated DevB outputs:
 │   └── utils.py               # Logging, constants, helpers
 │
 ├── app/
-│   ├── app.py                 # Streamlit dashboard entry point
+│   ├── app.py                 # Streamlit dashboard entry point (Legacy)
+│   ├── main.py                # FastAPI backend server
 │   └── components/
 │       ├── flow_visualizer.py # Money-flow graph rendering
 │       └── str_validator.py   # STR narrative vs graph evidence
+│
+├── frontend/                  # React (Vite) Frontend application
+│   ├── index.html             # Main HTML page template
+│   ├── package.json           # Frontend dependencies & scripts
+│   ├── postcss.config.js      # PostCSS configuration for Tailwind
+│   ├── tailwind.config.js     # Tailwind CSS config
+│   ├── vite.config.js         # Vite development server config
+│   └── src/
+│       ├── App.css
+│       ├── App.jsx            # Core React root component
+│       ├── index.css          # Tailwind directives & theme configuration
+│       ├── main.jsx           # App entry point
+│       ├── components/
+│       │   ├── GlobeLanding.jsx      # Canvas-based 3D spinning globe landing state
+│       │   ├── WorkspaceShell.jsx    # Dashboard navigation sidebar and header layout
+│       │   ├── DynamicMetricCard.jsx # Mouse-pointer-tracking custom glow card
+│       │   ├── LayeringAlluvial.jsx  # D3-rendered multi-hop transfer alluvial flow
+│       │   ├── ClaimsVerification.jsx# Narrative vs. transaction evidence cross-check card
+│       │   └── DashboardMain.jsx     # Master workspace layout & state controller
+│       └── services/
+│           └── apiService.js         # Backend fetch services client
 │
 └── tests/
     ├── test_data_loader.py
@@ -119,4 +133,4 @@ Generated DevB outputs:
 
 ## License
 
-This project was developed for the AI/ML Intelligence Hackathon 2025.
+This project was developed for the AI/ML Intelligence Hackathon 2026.

@@ -21,8 +21,10 @@ matplotlib>=3.7
 seaborn>=0.12
 plotly>=5.15
 
-# Web Dashboard
+# Web Dashboard & APIs
 streamlit>=1.28
+fastapi>=0.100.0
+uvicorn>=0.20.0
 
 # XML & Text Processing
 lxml>=4.9
