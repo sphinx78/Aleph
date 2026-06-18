@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+@theme {
+  --color-sage-50: #F5F7F5;
+  --color-sage-100: #EAEEEC;
+  --color-sage-200: #CCD8CE;
+  --color-sage-300: #99B29B;
+  --color-sage-400: #7B9B7E;
+  --color-sage-500: #5F7F62;
+  --color-sage-800: #2E3F2F;
+  --color-sage: #99B29B;
+
+  --color-sand-50: #FDFCFB;
+  --color-sand-100: #FAF7F2;
+  --color-sand-200: #EAE1D4;
+  --color-sand-300: #D6C8B5;
+  --color-sand-400: #A3917A;
+  --color-sand-800: #6B6864;
+  --color-sand: #FAF7F2;
+
+  --color-clay-50: #FBF5F1;
+  --color-clay-100: #F6E6DC;
+  --color-clay-300: #E2B193;
+  --color-clay-500: #C07A50;
+  --color-clay-800: #7E4C2E;
+  --color-clay: #C07A50;
+
+  --color-charcoal-light: #6B6864;
+  --color-charcoal-dark: #1A1A1A;
+  --color-charcoal: #2D2D2D;
+
+  --font-sans: "Inter", "Outfit", sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  --scale-102: 1.02;
+}
+
+@utility animate-fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom Scrollbar for modern aesthetic */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #EAE1D4;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D6C8B5;
+}
+
+/* Tailwind range input custom styles */
+input[type="range"]::-webkit-slider-thumb {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  background: #99B29B;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -4px;
+}
