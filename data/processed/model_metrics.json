@@ -1,0 +1,14 @@
+{
+  "feature_columns": 67,
+  "feature_rows": 65339,
+  "final_risk_counts": {
+    "CRITICAL": 23,
+    "ELEVATED": 10236,
+    "HIGH": 389,
+    "LOW": 54581,
+    "SEVERE": 110
+  },
+  "max_risk_score": 1.0,
+  "model_trained": false,
+  "risk_scores_path": "/Users/shubham/Downloads/Aleph/data/processed/risk_scores.csv"
+}
