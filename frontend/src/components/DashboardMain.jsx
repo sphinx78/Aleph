@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import WorkspaceShell from './WorkspaceShell';
 import DynamicMetricCard from './DynamicMetricCard';
 import LayeringAlluvial from './LayeringAlluvial';
@@ -149,7 +149,8 @@ export default function DashboardMain() {
       {(activeSection === 'topology' || activeSection === 'ml-explain') && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
           
-          <DynamicMetricCard 
+          <DynamicMetricCard
+            variant="mint"
             title="Leiden Clustering" 
             uppercaseSub="Community Risk Index" 
             value={features && features.scan_cluster !== undefined ? `Cluster ${features.scan_cluster}` : "High Density"}
@@ -159,7 +160,8 @@ export default function DashboardMain() {
             are grouped into localized risk pools.
           </DynamicMetricCard>
 
-          <DynamicMetricCard 
+          <DynamicMetricCard
+            variant="violet"
             title="Hawkes Intensity" 
             uppercaseSub="Time-Series Velocity" 
             value={features && features.hawkes_intensity !== undefined ? `${features.hawkes_intensity.toFixed(3)} λ` : "8.824 λ"}
@@ -167,7 +169,8 @@ export default function DashboardMain() {
             Tracks rapid cash flow patterns across accounts to isolate automated layering cycles.
           </DynamicMetricCard>
 
-          <DynamicMetricCard 
+          <DynamicMetricCard
+            variant="solar"
             title="Structuring Evasion" 
             uppercaseSub="Threshold Proximity" 
             value={features && features.tps_score !== undefined ? `${(features.tps_score * 100).toFixed(1)}%` : "98.0%"}

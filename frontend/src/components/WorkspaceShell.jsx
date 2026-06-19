@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Shield, Cpu, Activity, FileText } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Activity, Cpu, FileText, Moon, Shield, Sun } from 'lucide-react';
 import { fetchHealthStatus } from '../services/apiService';
 
 export default function WorkspaceShell({ activeSection, setActiveSection, children }) {
   const [apiStatus, setApiStatus] = useState('checking'); // 'ok' | 'degraded' | 'offline' | 'checking'
   const [apiVersion, setApiVersion] = useState('...');
+  const [theme, setTheme] = useState(() => localStorage.getItem('aleph-theme') || 'light');
 
   useEffect(() => {
     const check = async () => {
@@ -16,6 +17,11 @@ export default function WorkspaceShell({ activeSection, setActiveSection, childr
     const interval = setInterval(check, 30_000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('aleph-theme', theme);
+    document.documentElement.dataset.alephTheme = theme;
+  }, [theme]);
 
   const statusConfig = {
     ok:       { dot: 'bg-[#99B29B]', ping: 'bg-[#99B29B]', label: 'Pipeline Connected',   text: 'text-[#6B6864]' },
@@ -34,7 +40,7 @@ export default function WorkspaceShell({ activeSection, setActiveSection, childr
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#2D2D2D] flex overflow-hidden font-sans">
+    <div className="aleph-shell min-h-screen bg-[#FAF7F2] text-[#2D2D2D] flex overflow-hidden font-sans" data-theme={theme}>
 
       {/* Sidebar */}
       <aside className="w-76 bg-white border-r border-[#EAE1D4] flex flex-col justify-between shrink-0">
@@ -120,6 +126,17 @@ export default function WorkspaceShell({ activeSection, setActiveSection, childr
           </div>
 
           <div className="flex items-center space-x-4">
+            <button
+              type="button"
+              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+              className="aleph-theme-toggle"
+              aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            >
+              <span className="aleph-theme-toggle__icon">
+                {theme === 'light' ? <Sun size={15} /> : <Moon size={15} />}
+              </span>
+              <span>{theme}</span>
+            </button>
             <div className="text-right">
               <p className="text-[10px] text-[#6B6864] font-medium uppercase tracking-wider">
                 Analyst Session

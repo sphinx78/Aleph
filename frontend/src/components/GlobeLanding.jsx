@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import * as d3Geo from 'd3-geo';
 import * as topojson from 'topojson-client';
 

@@ -1,9 +1,26 @@
-import React, { useRef, useState } from 'react';
+import { Activity, ChevronRight, Network, Triangle } from 'lucide-react';
+import { useRef, useState } from 'react';
 
-export default function DynamicMetricCard({ children, title, uppercaseSub, value, trend }) {
+const variantMeta = {
+  mint: {
+    className: 'neon-metric-card--mint',
+    Icon: Network,
+  },
+  violet: {
+    className: 'neon-metric-card--violet',
+    Icon: Activity,
+  },
+  solar: {
+    className: 'neon-metric-card--solar',
+    Icon: Triangle,
+  },
+};
+
+export default function DynamicMetricCard({ children, title, uppercaseSub, value, trend, variant = 'mint' }) {
   const cardRef = useRef(null);
   const [coords, setCoords] = useState({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false);
+  const meta = variantMeta[variant] ?? variantMeta.mint;
+  const Icon = meta.Icon;
 
   const handleMouseMove = (e) => {
     const card = cardRef.current;
@@ -19,47 +36,38 @@ export default function DynamicMetricCard({ children, title, uppercaseSub, value
     <div
       ref={cardRef}
       onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="relative overflow-hidden bg-white/75 backdrop-blur-md rounded-xl border border-[#EAE1D4] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 group"
+      className={`neon-metric-card ${meta.className}`}
+      style={{
+        '--spot-x': `${coords.x}px`,
+        '--spot-y': `${coords.y}px`,
+      }}
     >
-      {/* Interactive cursor tracking gradient background */}
-      <div 
-        className="absolute inset-0 pointer-events-none transition-opacity duration-300 opacity-0 group-hover:opacity-100"
-        style={{
-          background: `radial-gradient(240px circle at ${coords.x}px ${coords.y}px, rgba(153, 178, 155, 0.15), transparent 80%)`
-        }}
-      />
+      <div className="neon-metric-card__glass" />
+      <div className="neon-metric-card__icon" aria-hidden="true">
+        <Icon size={20} strokeWidth={2.25} />
+      </div>
 
-      <div className="relative z-10 flex flex-col justify-between h-full">
-        <div>
-          <div className="flex justify-between items-start mb-2">
-            <span className="text-[10px] uppercase tracking-[0.2em] text-[#C07A50] font-bold">
-              {uppercaseSub}
-            </span>
-            {trend && (
-              <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
-                trend.direction === 'up' ? 'bg-[#99B29B]/15 text-[#99B29B]' : 'bg-red-50 text-red-600'
-              }`}>
-                {trend.value}
-              </span>
-            )}
-          </div>
-          <h3 className="text-xl font-serif text-[#2D2D2D] font-medium tracking-tight mb-4">
-            {title}
-          </h3>
+      <div className="neon-metric-card__content">
+        <div className="neon-metric-card__topline">
+          <span>{uppercaseSub}</span>
+          {trend && <strong>{trend.value}</strong>}
         </div>
+        <h3>{title}</h3>
 
-        <div>
-          {value && (
-            <p className="text-3xl font-mono tracking-tight text-[#2D2D2D] font-semibold mb-2">
-              {value}
-            </p>
-          )}
-          <div className="text-xs text-[#6B6864] leading-relaxed font-light">
-            {children}
-          </div>
+        {value && <p className="neon-metric-card__value">{value}</p>}
+        <p className="neon-metric-card__copy">{children}</p>
+      </div>
+
+      <div className="neon-metric-card__footer">
+        <div className="neon-metric-card__dots" aria-hidden="true">
+          <span />
+          <span />
+          <span />
         </div>
+        <button type="button" aria-label={`Open ${title} details`}>
+          <span>Open</span>
+          <ChevronRight size={15} strokeWidth={2.4} />
+        </button>
       </div>
     </div>
   );

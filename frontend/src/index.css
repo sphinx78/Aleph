@@ -108,3 +108,378 @@ input[type="range"]::-webkit-slider-thumb {
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite linear;
 }
+
+.aleph-shell {
+  --shell-bg: #FAF7F2;
+  --shell-panel: rgba(255, 255, 255, 0.92);
+  --shell-panel-soft: rgba(250, 247, 242, 0.74);
+  --shell-border: rgba(214, 200, 181, 0.72);
+  --shell-text: #2D2D2D;
+  --shell-muted: #6B6864;
+  --shell-shadow: rgba(69, 53, 38, 0.10);
+  --card-ink: #172117;
+  background:
+    radial-gradient(ellipse 64% 40% at 62% 5%, rgba(192, 122, 80, 0.08), transparent 60%),
+    radial-gradient(ellipse 58% 42% at 38% 8%, rgba(153, 178, 155, 0.16), transparent 62%),
+    var(--shell-bg);
+  color: var(--shell-text);
+  transition: background 260ms ease, color 260ms ease;
+}
+
+.aleph-shell[data-theme="dark"] {
+  --shell-bg: #050807;
+  --shell-panel: rgba(9, 17, 18, 0.88);
+  --shell-panel-soft: rgba(12, 22, 23, 0.68);
+  --shell-border: rgba(104, 134, 126, 0.28);
+  --shell-text: #ECFFF9;
+  --shell-muted: #A6BDB6;
+  --shell-shadow: rgba(0, 0, 0, 0.48);
+  --card-ink: #F0FFFA;
+  background:
+    radial-gradient(ellipse 68% 42% at 48% 0%, rgba(0, 255, 214, 0.12), transparent 62%),
+    radial-gradient(ellipse 55% 40% at 96% 8%, rgba(192, 132, 252, 0.13), transparent 58%),
+    linear-gradient(160deg, #040807 0%, #071116 48%, #06120f 100%);
+}
+
+.aleph-shell[data-theme="dark"] aside,
+.aleph-shell[data-theme="dark"] header,
+.aleph-shell[data-theme="dark"] .bg-white {
+  background-color: var(--shell-panel) !important;
+  color: var(--shell-text);
+  border-color: var(--shell-border) !important;
+  backdrop-filter: blur(18px);
+}
+
+.aleph-shell[data-theme="dark"] .bg-white\/75 {
+  background-color: var(--shell-panel) !important;
+  color: var(--shell-text);
+  border-color: var(--shell-border) !important;
+  box-shadow: 0 24px 58px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.aleph-shell[data-theme="dark"] table,
+.aleph-shell[data-theme="dark"] textarea,
+.aleph-shell[data-theme="dark"] code,
+.aleph-shell[data-theme="dark"] input {
+  color: var(--shell-text);
+}
+
+.aleph-shell[data-theme="dark"] thead tr,
+.aleph-shell[data-theme="dark"] .bg-\[\#FAF7F2\]\/50,
+.aleph-shell[data-theme="dark"] .bg-\[\#FAF7F2\] {
+  background-color: rgba(14, 24, 25, 0.68) !important;
+}
+
+.aleph-shell[data-theme="dark"] main,
+.aleph-shell[data-theme="dark"] main.bg-\[\#FAF7F2\] {
+  background-color: transparent !important;
+}
+
+.aleph-shell[data-theme="dark"] .text-\[\#2D2D2D\] {
+  color: var(--shell-text) !important;
+}
+
+.aleph-shell[data-theme="dark"] .text-\[\#6B6864\] {
+  color: var(--shell-muted) !important;
+}
+
+.aleph-shell[data-theme="dark"] .border-\[\#EAE1D4\],
+.aleph-shell[data-theme="dark"] .border-\[\#FAF7F2\] {
+  border-color: var(--shell-border) !important;
+}
+
+.aleph-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 7.25rem;
+  justify-content: center;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(214, 200, 181, 0.65);
+  background: rgba(255, 255, 255, 0.72);
+  color: #2D2D2D;
+  box-shadow: 0 8px 28px rgba(69, 53, 38, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, color 180ms ease;
+}
+
+.aleph-theme-toggle:hover {
+  transform: translateY(-1px);
+  border-color: rgba(153, 178, 155, 0.78);
+}
+
+.aleph-theme-toggle__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 999px;
+  background: rgba(153, 178, 155, 0.18);
+  color: #5F7F62;
+}
+
+.aleph-shell[data-theme="dark"] .aleph-theme-toggle {
+  border-color: rgba(94, 234, 212, 0.24);
+  background: rgba(8, 18, 19, 0.82);
+  color: #E8FFF8;
+  box-shadow: 0 0 26px rgba(0, 255, 214, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.aleph-shell[data-theme="dark"] .aleph-theme-toggle__icon {
+  background: rgba(0, 255, 214, 0.12);
+  color: #5EEAD4;
+}
+
+.neon-metric-card {
+  --card-accent: #99B29B;
+  --card-accent-2: #5F7F62;
+  --card-wash: rgba(153, 178, 155, 0.26);
+  --card-glow: rgba(153, 178, 155, 0.28);
+  position: relative;
+  isolation: isolate;
+  min-height: 15.3rem;
+  overflow: hidden;
+  border-radius: 2rem;
+  padding: 2.05rem 2rem 1.55rem;
+  color: var(--card-ink);
+  background:
+    radial-gradient(260px circle at var(--spot-x, 86%) var(--spot-y, 18%), color-mix(in srgb, var(--card-accent) 32%, transparent), transparent 68%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.46));
+  border: 1px solid color-mix(in srgb, var(--card-accent) 52%, white);
+  box-shadow:
+    0 20px 46px var(--shell-shadow),
+    0 0 0 1px rgba(255, 255, 255, 0.42) inset,
+    0 0 28px var(--card-glow);
+  transform-style: preserve-3d;
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+}
+
+.neon-metric-card:hover {
+  transform: translateY(-5px) rotateX(1deg);
+  box-shadow:
+    0 26px 60px var(--shell-shadow),
+    0 0 0 1px rgba(255, 255, 255, 0.48) inset,
+    0 0 46px var(--card-glow);
+}
+
+.neon-metric-card::before,
+.neon-metric-card::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.neon-metric-card::before {
+  width: 74%;
+  height: 118%;
+  right: -18%;
+  top: -26%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 70% 18%, rgba(255, 255, 255, 0.58), transparent 16%),
+    repeating-radial-gradient(circle at 72% 19%, rgba(255, 255, 255, 0.20) 0 14px, transparent 15px 38px),
+    linear-gradient(145deg, var(--card-wash), color-mix(in srgb, var(--card-accent-2) 40%, transparent));
+  filter: blur(0.2px);
+}
+
+.neon-metric-card::after {
+  width: 86%;
+  height: 92%;
+  right: -10%;
+  bottom: -32%;
+  border-radius: 48% 52% 0 0;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.42), color-mix(in srgb, var(--card-accent) 22%, transparent));
+  transform: rotate(-8deg);
+}
+
+.neon-metric-card__glass {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.22), transparent 44%),
+    radial-gradient(circle at 14% 92%, rgba(255, 255, 255, 0.32), transparent 18%);
+  backdrop-filter: blur(14px);
+}
+
+.neon-metric-card__icon {
+  position: absolute;
+  right: 1.25rem;
+  top: 1.15rem;
+  z-index: 2;
+  display: inline-flex;
+  width: 2.65rem;
+  height: 2.65rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.96);
+  background: color-mix(in srgb, var(--card-accent) 54%, transparent);
+  box-shadow: 0 0 26px color-mix(in srgb, var(--card-accent) 44%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.neon-metric-card__content,
+.neon-metric-card__footer {
+  position: relative;
+  z-index: 3;
+}
+
+.neon-metric-card__topline {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  min-height: 1.2rem;
+  margin-bottom: 1.2rem;
+  color: color-mix(in srgb, var(--card-accent-2) 72%, var(--card-ink));
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.neon-metric-card__topline span {
+  max-width: 10.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.neon-metric-card__topline strong {
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+}
+
+.neon-metric-card h3 {
+  max-width: 14rem;
+  margin: 0 0 0.85rem;
+  color: var(--card-ink);
+  font-family: var(--font-serif);
+  font-size: clamp(1.32rem, 2vw, 1.62rem);
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.neon-metric-card__value {
+  max-width: 13rem;
+  margin: 0 0 0.9rem;
+  color: var(--card-ink);
+  font-family: var(--font-mono);
+  font-size: clamp(2rem, 4vw, 2.65rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.neon-metric-card__copy {
+  display: -webkit-box;
+  max-width: 14rem;
+  min-height: 3.9rem;
+  margin: 0;
+  overflow: hidden;
+  color: color-mix(in srgb, var(--card-ink) 74%, transparent);
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.neon-metric-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.45rem;
+}
+
+.neon-metric-card__dots {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.neon-metric-card__dots span {
+  width: 0.46rem;
+  height: 0.46rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.38);
+}
+
+.neon-metric-card__footer button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 0;
+  background: transparent;
+  color: color-mix(in srgb, var(--card-accent-2) 72%, white);
+  font-family: var(--font-mono);
+  font-size: 0.73rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 160ms ease, color 160ms ease;
+}
+
+.neon-metric-card__footer button:hover {
+  transform: translateX(2px);
+  color: var(--card-ink);
+}
+
+.neon-metric-card--violet {
+  --card-accent: #A78BFA;
+  --card-accent-2: #6D28D9;
+  --card-wash: rgba(167, 139, 250, 0.28);
+  --card-glow: rgba(167, 139, 250, 0.35);
+}
+
+.neon-metric-card--solar {
+  --card-accent: #E2A46F;
+  --card-accent-2: #9A4D21;
+  --card-wash: rgba(226, 164, 111, 0.30);
+  --card-glow: rgba(192, 122, 80, 0.30);
+}
+
+.aleph-shell[data-theme="dark"] .neon-metric-card {
+  background:
+    radial-gradient(280px circle at var(--spot-x, 86%) var(--spot-y, 18%), color-mix(in srgb, var(--card-accent) 22%, transparent), transparent 68%),
+    linear-gradient(140deg, rgba(12, 23, 26, 0.82), rgba(6, 13, 14, 0.72));
+  border-color: color-mix(in srgb, var(--card-accent) 48%, transparent);
+  box-shadow:
+    0 26px 60px rgba(0, 0, 0, 0.42),
+    0 0 0 1px rgba(255, 255, 255, 0.07) inset,
+    0 0 38px color-mix(in srgb, var(--card-accent) 22%, transparent);
+}
+
+.aleph-shell[data-theme="dark"] .neon-metric-card::before {
+  background:
+    radial-gradient(circle at 70% 18%, rgba(255, 255, 255, 0.18), transparent 16%),
+    repeating-radial-gradient(circle at 72% 19%, color-mix(in srgb, var(--card-accent) 18%, transparent) 0 14px, transparent 15px 38px),
+    linear-gradient(145deg, color-mix(in srgb, var(--card-accent) 20%, transparent), color-mix(in srgb, var(--card-accent-2) 28%, transparent));
+}
+
+.aleph-shell[data-theme="dark"] .neon-metric-card::after {
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.10), color-mix(in srgb, var(--card-accent) 16%, transparent));
+}
+
+@media (max-width: 760px) {
+  .neon-metric-card {
+    min-height: 14rem;
+    border-radius: 1.45rem;
+    padding: 1.55rem;
+  }
+
+  .neon-metric-card__value {
+    font-size: 2rem;
+  }
+}
