@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import WorkspaceShell from './WorkspaceShell';
 import DynamicMetricCard from './DynamicMetricCard';
 import LayeringAlluvial from './LayeringAlluvial';
@@ -33,6 +33,7 @@ export default function DashboardMain() {
   const [minScoreFilter, setMinScoreFilter] = useState(0.5);
   const [selectedBands, setSelectedBands] = useState(['CRITICAL', 'SEVERE', 'HIGH']);
   const [copiedCopilot, setCopiedCopilot] = useState(false);
+
 
   // Initial load
   useEffect(() => {
@@ -147,7 +148,7 @@ export default function DashboardMain() {
       
       {/* Top Overview Cards (Only shown on Graph Topology & Explainability Hub) */}
       {(activeSection === 'topology' || activeSection === 'ml-explain') && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+        <div className="neon-shape-grid mb-10">
           
           <DynamicMetricCard
             variant="mint"
