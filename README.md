@@ -158,4 +158,3 @@ Verify that all backend algorithms and modules execute correctly:
 ```bash
 python -m pytest tests/ -v
 ```
-All 22 core test cases (validating Hawkes processes, DFA indexes, Soundex, DFS layering, and Hawala matches) should pass successfully.
