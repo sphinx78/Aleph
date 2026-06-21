@@ -16,6 +16,27 @@ export default function ForceGraphPanel({ accountId }) {
   const containerRef = useRef(null);
   const fgRef = useRef(null);
   const [canvasWidth, setCanvasWidth] = useState(500);
+  const [theme, setTheme] = useState(() => {
+    return document.documentElement.dataset.alephTheme || 
+           document.querySelector('.aleph-shell')?.getAttribute('data-theme') || 
+           'light';
+  });
+
+  useEffect(() => {
+    const updateTheme = () => {
+      const currentTheme = document.documentElement.dataset.alephTheme || 
+                           document.querySelector('.aleph-shell')?.getAttribute('data-theme') || 
+                           'light';
+      setTheme(currentTheme);
+    };
+
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(document.documentElement, { attributes: true });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const isDark = theme === 'dark';
 
   useEffect(() => {
     if (!accountId) return;
@@ -96,15 +117,15 @@ export default function ForceGraphPanel({ accountId }) {
     let coreColor, haloColor, strokeColor;
     if (role === 'target') {
       coreColor   = '#C07A50';
-      haloColor   = 'rgba(192, 122, 80, 0.25)';
+      haloColor   = isDark ? 'rgba(192, 122, 80, 0.4)' : 'rgba(192, 122, 80, 0.25)';
       strokeColor = '#9A5F38';
     } else if (role === 'intermediary') {
       coreColor   = '#D08A60';
-      haloColor   = 'rgba(208, 138, 96, 0.20)';
+      haloColor   = isDark ? 'rgba(208, 138, 96, 0.35)' : 'rgba(208, 138, 96, 0.20)';
       strokeColor = '#B06A40';
     } else {
       coreColor   = '#99B29B';
-      haloColor   = 'rgba(153, 178, 155, 0.18)';
+      haloColor   = isDark ? 'rgba(153, 178, 155, 0.35)' : 'rgba(153, 178, 155, 0.18)';
       strokeColor = '#7B9B7E';
     }
 
@@ -131,7 +152,7 @@ export default function ForceGraphPanel({ accountId }) {
       ctx.font = `${fontSize}px 'JetBrains Mono', monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      ctx.fillStyle = '#6B6864';
+      ctx.fillStyle = isDark ? '#A6BDB6' : '#6B6864';
       ctx.fillText(String(node.id), node.x, node.y + radius + 2);
     }
 
@@ -178,7 +199,7 @@ export default function ForceGraphPanel({ accountId }) {
         </div>
 
         {/* Canvas area */}
-        <div ref={containerRef} className="flex-1 rounded-lg overflow-hidden border border-[#EAE1D4] bg-[#FAF7F2]/40 relative">
+        <div ref={containerRef} className="flex-1 rounded-lg overflow-hidden border border-[#EAE1D4] bg-[#FAF7F2]/50 relative">
           {loading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center space-y-3">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-[#99B29B]" />
@@ -215,8 +236,12 @@ export default function ForceGraphPanel({ accountId }) {
               nodeCanvasObjectMode={() => 'replace'}
               onNodeHover={handleNodeHover}
               linkColor={link => {
-                if (highlightLinks.size === 0) return '#D6C8B5';
-                return highlightLinks.has(link) ? '#C07A50' : 'rgba(214, 200, 181, 0.1)';
+                if (highlightLinks.size === 0) {
+                  return isDark ? 'rgba(104, 134, 126, 0.45)' : '#D6C8B5';
+                }
+                return highlightLinks.has(link) 
+                  ? '#C07A50' 
+                  : (isDark ? 'rgba(104, 134, 126, 0.1)' : 'rgba(214, 200, 181, 0.1)');
               }}
               linkWidth={link => (highlightLinks.has(link) ? 2.5 : 1.0)}
               linkDirectionalParticles={link => {
