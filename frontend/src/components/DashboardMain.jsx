@@ -4,6 +4,8 @@ import DynamicMetricCard from './DynamicMetricCard';
 import LayeringAlluvial from './LayeringAlluvial';
 import ClaimsVerification from './ClaimsVerification';
 import AlephCard from './AlephCard';
+import ForceGraphPanel from './ForceGraphPanel';
+import GraphRagCopilot from './GraphRagCopilot';
 import {
   fetchHighRiskAccounts,
   fetchAccountFeatures,
@@ -13,6 +15,56 @@ import {
   fetchAccountCopilot,
   fetchTypologyAlerts
 } from '../services/apiService';
+
+const renderMarkdown = (text) => {
+  if (!text) return null;
+  const lines = text.split('\n');
+  return lines.map((line, idx) => {
+
+    // Bullet: "* " or "- " (with space), but NOT "**" (bold)
+    const isBullet = /^\s*(\*|-)\s+/.test(line) && !/^\s*\*\*/.test(line);
+    if (isBullet) {
+      const bulletText = line.replace(/^\s*[*-]\s+/, '');
+      const formatted = bulletText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      return (
+        <ul key={idx} className="list-disc pl-5 mb-1 text-[11px]">
+          <li dangerouslySetInnerHTML={{ __html: formatted }} />
+        </ul>
+      );
+    }
+
+    // Numbered list: "1. item"
+    const numMatch = line.trim().match(/^(\d+)\.\s+(.*)/);
+    if (numMatch) {
+      const rest = numMatch[2].replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      return (
+        <ol key={idx} className="list-decimal pl-5 mb-1 text-[11px]">
+          <li value={parseInt(numMatch[1], 10)} dangerouslySetInnerHTML={{ __html: rest }} />
+        </ol>
+      );
+    }
+
+    // Dividers: 4+ equals or 4+ dashes on their own line
+    if (/^={4,}$/.test(line.trim()) || /^-{4,}$/.test(line.trim())) {
+      return <hr key={idx} className="border-t border-[#EAE1D4] my-3" />;
+    }
+
+    // Empty lines
+    if (line.trim() === '') {
+      return <div key={idx} className="h-1.5" />;
+    }
+
+    // Bold **text** applied only after all structural checks
+    const content = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    return (
+      <p
+        key={idx}
+        className="mb-1"
+        dangerouslySetInnerHTML={{ __html: content }}
+      />
+    );
+  });
+};
 
 export default function DashboardMain() {
   const [activeSection, setActiveSection] = useState('topology');
@@ -366,6 +418,26 @@ export default function DashboardMain() {
 
           </div>
 
+          {/* Topological Map & Copilot Section */}
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
+            <div className="xl:col-span-2">
+              <ForceGraphPanel accountId={selectedAccountId} />
+            </div>
+            <div>
+              <GraphRagCopilot 
+                accountId={selectedAccountId} 
+                accountMetrics={{
+                  pagerank: features?.pagerank ?? 0.000812,
+                  hawkes: features?.hawkes_intensity ?? 8.8245,
+                  dfa: features?.dfa_score ?? 1.000,
+                  tps: features?.tps_score ?? 0.98,
+                  burt_constraint: features?.structural_constraint ?? 1.08,
+                  leiden_cluster: features?.scan_cluster ?? -1
+                }} 
+              />
+            </div>
+          </div>
+
           {/* Lower Alluvial Path & Claims */}
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
             <div className="xl:col-span-2">
@@ -518,11 +590,9 @@ export default function DashboardMain() {
                   <p className="text-[10px] text-[#6B6864] uppercase tracking-wider">Generating SAR narrative...</p>
                 </div>
               ) : (
-                <textarea
-                  value={copilotReport}
-                  readOnly
-                  className="w-full h-[400px] border border-[#EAE1D4] rounded-lg p-6 bg-[#FAF7F2]/50 font-mono text-[11px] leading-relaxed text-[#2D2D2D] focus:outline-none overflow-y-auto resize-none"
-                />
+                <div className="w-full h-[400px] border border-[#EAE1D4] rounded-lg p-6 bg-[#FAF7F2]/50 font-mono text-[11px] leading-relaxed text-[#2D2D2D] overflow-y-auto">
+                  {renderMarkdown(copilotReport)}
+                </div>
               )}
             </div>
           </AlephCard>
