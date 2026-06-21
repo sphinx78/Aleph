@@ -58,7 +58,7 @@ class AnalystCopilot:
                     "stream": False
                 }
                 logger.info("Generating summary via Ollama LLM...")
-                response = requests.post(self.ollama_url, json=payload, timeout=10.0)
+                response = requests.post(self.ollama_url, json=payload, timeout=60.0)
                 if response.status_code == 200:
                     return response.json().get('response', '')
             except Exception as e:
