@@ -20,6 +20,19 @@ export default function LayeringAlluvial({ pathData }) {
 
     const g = svg.append('g').attr('transform', 'translate(40, 0)');
 
+    // 0. Define an arrow marker for directed graph
+    svg.append("defs").append("marker")
+      .attr("id", "arrowhead")
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", 25)
+      .attr("refY", 0)
+      .attr("orient", "auto")
+      .attr("markerWidth", 6)
+      .attr("markerHeight", 6)
+      .append("path")
+      .attr("d", "M 0,-5 L 10,0 L 0,5")
+      .attr("fill", "#99B29B");
+
     // 1. Draw connecting bezier flows between transaction nodes
     for (let i = 0; i < pathData.length - 1; i++) {
       const x1 = i * stepX + 30;
@@ -41,7 +54,8 @@ export default function LayeringAlluvial({ pathData }) {
         .attr('fill', 'none')
         .attr('stroke', '#99B29B')
         .attr('stroke-width', 2)
-        .attr('stroke-dasharray', '8, 4');
+        .attr('stroke-dasharray', '8, 4')
+        .attr('marker-end', 'url(#arrowhead)');
 
       // Simple animated flow effect
       activePath.append('animate')
