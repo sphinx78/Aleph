@@ -34,11 +34,45 @@ export default function GlobeLanding({ onEnter }) {
 
     // Transaction flow corridors (Nepal cross-border Hawala patterns)
     const corridors = [
-      { from: [84.124, 28.394], to: [-0.127, 51.507] },  // Nepal → UK
-      { from: [84.124, 28.394], to: [55.304, 25.263] },   // Nepal → UAE
-      { from: [78.962, 20.593], to: [84.124, 28.394] },   // India → Nepal
-    ];
+      // Nepal → World
+      { from: [84.124, 28.394], to: [55.304, 25.263] },   // Nepal → Dubai
+      { from: [84.124, 28.394], to: [-0.127, 51.507] },   // Nepal → London
+      { from: [84.124, 28.394], to: [-74.006, 40.712] },  // Nepal → New York
+      { from: [84.124, 28.394], to: [103.819, 1.352] },   // Nepal → Singapore
+      { from: [84.124, 28.394], to: [139.692, 35.689] },  // Nepal → Tokyo
+      { from: [84.124, 28.394], to: [151.209, -33.868] }, // Nepal → Sydney
 
+      // World → Nepal
+      { from: [55.304, 25.263], to: [84.124, 28.394] },   // Dubai → Nepal
+      { from: [-0.127, 51.507], to: [84.124, 28.394] },   // London → Nepal
+      { from: [-74.006, 40.712], to: [84.124, 28.394] },  // New York → Nepal
+      { from: [103.819, 1.352], to: [84.124, 28.394] },   // Singapore → Nepal
+      { from: [46.675, 24.713], to: [84.124, 28.394] },   // Riyadh → Nepal
+      { from: [51.531, 25.286], to: [84.124, 28.394] },   // Doha → Nepal
+      { from: [50.587, 26.223], to: [84.124, 28.394] },   // Bahrain → Nepal
+      { from: [58.383, 23.588], to: [84.124, 28.394] },   // Muscat → Nepal
+
+      // South Asia → Nepal
+      { from: [77.102, 28.704], to: [84.124, 28.394] },   // Delhi → Nepal
+      { from: [72.877, 19.076], to: [84.124, 28.394] },   // Mumbai → Nepal
+      { from: [90.412, 23.810], to: [84.124, 28.394] },   // Dhaka → Nepal
+      { from: [67.009, 24.861], to: [84.124, 28.394] },   // Karachi → Nepal
+      { from: [79.861, 6.927], to: [84.124, 28.394] },    // Colombo → Nepal
+
+      // World ↔ World hubs
+      { from: [55.304, 25.263], to: [-0.127, 51.507] },   // Dubai → London
+      { from: [-0.127, 51.507], to: [-74.006, 40.712] },  // London → New York
+      { from: [103.819, 1.352], to: [55.304, 25.263] },   // Singapore → Dubai
+      { from: [114.169, 22.319], to: [103.819, 1.352] },  // Hong Kong → Singapore
+      { from: [139.692, 35.689], to: [114.169, 22.319] }, // Tokyo → Hong Kong
+      { from: [121.565, 25.033], to: [139.692, 35.689] }, // Taipei → Tokyo
+
+      // Circular intelligence network around Nepal
+      { from: [55.304, 25.263], to: [103.819, 1.352] },   // Dubai → Singapore
+      { from: [103.819, 1.352], to: [-0.127, 51.507] },   // Singapore → London
+      { from: [-0.127, 51.507], to: [84.124, 28.394] },   // London → Nepal
+      { from: [84.124, 28.394], to: [46.675, 24.713] },   // Nepal → Riyadh
+    ];
     // Animated dash offset for flowing corridors
     let dashOffset = 0;
 
@@ -93,7 +127,7 @@ export default function GlobeLanding({ onEnter }) {
         if (!p1 || !p2) return;
 
         const d1 = d3Geo.geoDistance(from, projection.invert([width / 2, height / 2]));
-        const d2 = d3Geo.geoDistance(to,   projection.invert([width / 2, height / 2]));
+        const d2 = d3Geo.geoDistance(to, projection.invert([width / 2, height / 2]));
 
         if (d1 < Math.PI / 2 && d2 < Math.PI / 2) {
           const midX = (p1[0] + p2[0]) / 2;
@@ -168,11 +202,13 @@ export default function GlobeLanding({ onEnter }) {
       {/* Header copy */}
       <div className="text-center mb-8 max-w-2xl px-6 animate-fade-up">
         <h1 className="text-3xl font-serif text-[#2D2D2D] mt-3 mb-4 font-semibold tracking-tight leading-tight">
-          ALEPH: Anti-Money Laundering Intelligence Operating System
+          ALEPH א Anti-Laundering Entity & Pattern Hunter
         </h1>
-        <p className="text-sm text-[#6B6864] font-light leading-relaxed max-w-lg mx-auto">
-          Financial intelligence interface utilizing temporal graphs, unsupervised community detection, and explainable ML to isolate structured laundering operations across the transaction network.
+        <p className="text-sm text-[#6B6864] font-light leading-relaxed max-w-lg mx-auto mb-4">
         </p>
+        <div className="flex justify-center mt-2">
+          <span className="typing-effect">जालोभित्रको कथा</span>
+        </div>
       </div>
 
       {/* Rotating globe canvas */}
@@ -198,7 +234,7 @@ export default function GlobeLanding({ onEnter }) {
 
       {/* Subtle footer descriptor */}
       <p className="mt-5 text-[10px] uppercase tracking-[0.2em] text-[#D6C8B5] font-semibold">
-        ALEPH Operations Hub · v3.1.2
+        ALEPH Operations
       </p>
     </div>
   );
