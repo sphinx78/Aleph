@@ -30,3 +30,8 @@ python-Levenshtein>=0.21
 
 # Testing
 pytest>=7.4
+
+# Neo4j and Environment
+neo4j>=5.0.0
+python-dotenv>=1.0.0
+httpx>=0.24.0
