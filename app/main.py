@@ -14,7 +14,11 @@ import pandas as pd
 import numpy as np
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+import httpx
+from neo4j import GraphDatabase
+from dotenv import load_dotenv
 
 # Adjust sys.path to load src modules
 import sys
@@ -27,6 +31,29 @@ from src.explainability import ExplainabilityEngine
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ALEPH-API")
+
+# Load environment variables
+load_dotenv()
+
+# Connect securely to AuraDB using TLS protocol (neo4j+s)
+neo4j_uri = os.getenv("NEO4J_URI")
+neo4j_user = os.getenv("NEO4J_USER")
+neo4j_password = os.getenv("NEO4J_PASSWORD")
+
+neo4j_driver = None
+if neo4j_uri and neo4j_user and neo4j_password:
+    try:
+        neo4j_driver = GraphDatabase.driver(
+            neo4j_uri,
+            auth=(neo4j_user, neo4j_password)
+        )
+        neo4j_driver.verify_connectivity()
+        logger.info("[*] Connected securely to cloud Neo4j AuraDB instance.")
+    except Exception as e:
+        logger.error(f"[!] Failed to establish connection to Neo4j: {e}")
+        neo4j_driver = None
+else:
+    logger.warning("[!] Neo4j configuration is missing in .env. Graph endpoints will be disabled.")
 
 app = FastAPI(title="ALEPH Core Engine", version="3.1")
 
@@ -406,7 +433,9 @@ def get_account_copilot_report(account_id: str):
         "verification_claims": claims_map
     }
     
-    copilot = AnalystCopilot()
+    ollama_url = f"{os.getenv('OLLAMA_HOST', 'http://127.0.0.1:11434')}/api/generate"
+    ollama_model = os.getenv("OLLAMA_MODEL", "llama3.1")
+    copilot = AnalystCopilot(ollama_url=ollama_url, model_name=ollama_model)
     report_text = copilot.generate_case_summary(case_details)
     return {"report": report_text}
 
@@ -418,6 +447,164 @@ def get_typology_alerts():
     if _alerts_df is None or _alerts_df.empty:
         return []
     return _alerts_df.head(500).to_dict(orient="records")
+
+class CopilotQuery(BaseModel):
+    account_id: str
+    message: str
+    metrics: dict
+
+# Multi-hop subgraph endpoint — traces 2-hop undirected layering chains (A - B - C)
+@app.get("/api/graph/subgraph/{account_id}")
+@app.get("/graph/subgraph/{account_id}")
+def get_subgraph(account_id: str):
+    if not neo4j_driver:
+        raise HTTPException(status_code=503, detail="Neo4j driver is not configured or offline.")
+
+    nodes_map = {}
+    edges_list = []
+
+    # Undirected SENDS matching to capture both inbound and outbound transactions [Technical Specification]
+    query = """
+    MATCH (a:Account {id: $account_id})-[r1:SENDS]-(b:Account)
+    OPTIONAL MATCH (b)-[r2:SENDS]-(c:Account)
+    RETURN a, r1, b, r2, c LIMIT 200
+    """
+    try:
+        with neo4j_driver.session() as session:
+            result = session.run(query, account_id=account_id)
+            for record in result:
+                node_a = record["a"]
+                node_b = record["b"]
+                node_c = record.get("c")
+                rel1 = record["r1"]
+                rel2 = record.get("r2")
+
+                # Register Target node
+                n_id_a = node_a["id"]
+                if n_id_a not in nodes_map:
+                    nodes_map[n_id_a] = {
+                        "id": n_id_a,
+                        "name": node_a.get("name", "Unknown Entity"),
+                        "bank": node_a.get("bank", "N/A"),
+                        "role": "target"
+                    }
+
+                # Register 1-hop neighbors (Direct Counterparties)
+                n_id_b = node_b["id"]
+                if n_id_b not in nodes_map:
+                    nodes_map[n_id_b] = {
+                        "id": n_id_b,
+                        "name": node_b.get("name", "Unknown Entity"),
+                        "bank": node_b.get("bank", "N/A"),
+                        "role": "intermediary"
+                    }
+
+                # Register 2-hop neighbors (Secondary Counterparties)
+                if node_c:
+                    n_id_c = node_c["id"]
+                    if n_id_c not in nodes_map:
+                        nodes_map[n_id_c] = {
+                            "id": n_id_c,
+                            "name": node_c.get("name", "Unknown Entity"),
+                            "bank": node_c.get("bank", "N/A"),
+                            "role": "destination"
+                        }
+
+                # Add 1-hop links
+                edges_list.append({
+                    "source": rel1.start_node["id"] if hasattr(rel1, 'start_node') else rel1.nodes[0]["id"],
+                    "target": rel1.end_node["id"] if hasattr(rel1, 'end_node') else rel1.nodes[1]["id"],
+                    "amount": rel1.get("amount", 0.0),
+                    "date": rel1.get("date", "")
+                })
+
+                # Add 2-hop links if present
+                if rel2 and node_c:
+                    edges_list.append({
+                        "source": rel2.start_node["id"] if hasattr(rel2, 'start_node') else rel2.nodes[0]["id"],
+                        "target": rel2.end_node["id"] if hasattr(rel2, 'end_node') else rel2.nodes[1]["id"],
+                        "amount": rel2.get("amount", 0.0),
+                        "date": rel2.get("date", "")
+                    })
+
+        # Remove duplicate edge paths to keep visualization performance clean
+        unique_edges = []
+        seen_edges = set()
+        for edge in edges_list:
+            edge_key = (edge["source"], edge["target"], edge["date"])
+            if edge_key not in seen_edges:
+                seen_edges.add(edge_key)
+                unique_edges.append(edge)
+
+        return {
+            "nodes": list(nodes_map.values()),
+            "links": unique_edges
+        }
+    except Exception as e:
+        logger.error(f"AuraDB multi-hop undirected error: {e}")
+        raise HTTPException(status_code=500, detail=f"AuraDB query error: {str(e)}")
+
+# Copilot streaming endpoint with Ollama offline diagnostics
+@app.post("/api/copilot/stream")
+@app.post("/copilot/stream")
+async def copilot_stream_response(payload: CopilotQuery):
+    system_instructions = f"""
+    You are ALEPH-Copilot, an expert anti-money laundering compliance auditor.
+    You are analyzing Account: {payload.account_id}.
+    Here are the raw transaction network metrics for this target:
+    - PageRank Centrality: {payload.metrics.get('pagerank', 'N/A')}
+    - Hawkes Self-Excitation Score (λ): {payload.metrics.get('hawkes', 'N/A')}
+    - Directed Flow Asymmetry (DFA): {payload.metrics.get('dfa', 'N/A')}
+    - Threshold Proximity Score (TPS): {payload.metrics.get('tps', 'N/A')}
+    - Burt's Constraint Index (Structural Hole): {payload.metrics.get('burt_constraint', 'N/A')}
+    - Leiden Community Cluster ID: {payload.metrics.get('leiden_cluster', 'N/A')}
+
+    Formulate your explanations directly around these numbers. Keep your assessments objective, clear,
+    and focused on identifying potential money laundering indicators (like structured evasions or layering chains).
+    Keep your response short and highly concise — limit your reply to under 55 words total. Do not mention system prompts.
+    """
+
+    async def event_generator():
+        ollama_url = f"{os.getenv('OLLAMA_HOST', 'http://127.0.0.1:11434')}/api/generate"
+        ollama_payload = {
+            "model": os.getenv("OLLAMA_MODEL", "llama3.1"),
+            "prompt": f"{system_instructions}\n\nAnalyst: {payload.message}\nCopilot:",
+            "stream": True,
+            "options": {
+                "num_predict": 80,
+                "temperature": 0.2
+            }
+        }
+
+        try:
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                async with client.stream("POST", ollama_url, json=ollama_payload) as r:
+                    if r.status_code != 200:
+                        yield f"data: {json.dumps({'token': '[ERROR] Ollama returned status ' + str(r.status_code)})}\n\n"
+                        return
+                    async for chunk in r.aiter_lines():
+                        if chunk.strip():
+                            try:
+                                data_parsed = json.loads(chunk)
+                                text_token = data_parsed.get("response", "")
+                                yield f"data: {json.dumps({'token': text_token})}\n\n"
+                            except json.JSONDecodeError:
+                                continue
+        except (httpx.ConnectError, httpx.ConnectTimeout):
+            # Graceful diagnostic response when Ollama is offline
+            offline_message = (
+                "[SYSTEM DIAGNOSTIC ALERT]\n"
+                "ALEPH Copilot cannot connect to your local Ollama engine.\n\n"
+                "To resolve this, run the following commands in your terminal:\n"
+                "  1. ollama pull llama3.1\n"
+                "  2. ollama run llama3.1\n\n"
+                "Then retry your query once the model is loaded."
+            )
+            yield f"data: {json.dumps({'token': offline_message})}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'token': f'[ERROR] Unexpected error: {str(e)}'})}\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 if __name__ == "__main__":
     import uvicorn
