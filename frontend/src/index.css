@@ -166,7 +166,8 @@ input[type="range"]::-webkit-slider-thumb {
 
 .aleph-shell[data-theme="dark"] thead tr,
 .aleph-shell[data-theme="dark"] .bg-\[\#FAF7F2\]\/50,
-.aleph-shell[data-theme="dark"] .bg-\[\#FAF7F2\] {
+.aleph-shell[data-theme="dark"] .bg-\[\#FAF7F2\],
+.aleph-shell[data-theme="dark"] .hover\:bg-\[\#FAF7F2\]:hover {
   background-color: rgba(14, 24, 25, 0.68) !important;
 }
 
@@ -175,11 +176,13 @@ input[type="range"]::-webkit-slider-thumb {
   background-color: transparent !important;
 }
 
-.aleph-shell[data-theme="dark"] .text-\[\#2D2D2D\] {
+.aleph-shell[data-theme="dark"] .text-\[\#2D2D2D\],
+.aleph-shell[data-theme="dark"] .hover\:text-\[\#2D2D2D\]:hover {
   color: var(--shell-text) !important;
 }
 
-.aleph-shell[data-theme="dark"] .text-\[\#6B6864\] {
+.aleph-shell[data-theme="dark"] .text-\[\#6B6864\],
+.aleph-shell[data-theme="dark"] .hover\:text-\[\#6B6864\]:hover {
   color: var(--shell-muted) !important;
 }
 
@@ -503,7 +506,7 @@ input[type="range"]::-webkit-slider-thumb {
   -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, black, transparent);
 }
 
-.aleph-shell[data-theme="dark"] > * {
+.aleph-shell[data-theme="dark"] > main {
   position: relative;
   z-index: 1;
 }
