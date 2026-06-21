@@ -874,3 +874,58 @@ input[type="range"]::-webkit-slider-thumb {
   }
 }
 
+/* ——— Typing Effect for Nepali Text ——— */
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: #C07A50; }
+}
+
+.typing-effect {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid #C07A50;
+  animation: typing 2.5s steps(40, end), blink-caret .75s step-end infinite;
+  font-family: 'Yatra One', cursive;
+  font-size: 1.8rem;
+  color: #C07A50;
+  max-width: fit-content;
+}
+
+/* ——— Dark Mode Override for Action Queue ——— */
+.aleph-shell[data-theme="dark"] .action-queue-card {
+  background-color: rgba(30, 30, 35, 0.95) !important;
+  border-color: #2D2D2D !important;
+}
+.aleph-shell[data-theme="dark"] .action-queue-card h3 {
+  color: #EAE1D4 !important;
+}
+.aleph-shell[data-theme="dark"] .action-queue-card p, 
+.aleph-shell[data-theme="dark"] .action-queue-card span {
+  color: #B0A8A0 !important;
+}
+.aleph-shell[data-theme="dark"] .action-queue-card th {
+  background-color: #252528 !important;
+  color: #EAE1D4 !important;
+}
+.aleph-shell[data-theme="dark"] .action-queue-card tr {
+  color: #FFFFFF !important;
+}
+.aleph-shell[data-theme="dark"] .action-queue-card td {
+  color: #B0A8A0 !important;
+}
+.aleph-shell[data-theme="dark"] .action-queue-card table,
+.aleph-shell[data-theme="dark"] .action-queue-card th,
+.aleph-shell[data-theme="dark"] .action-queue-card td,
+.aleph-shell[data-theme="dark"] .action-queue-card tr {
+  border-color: #38383D !important;
+}
+.aleph-shell[data-theme="dark"] .action-queue-card tbody > tr:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
