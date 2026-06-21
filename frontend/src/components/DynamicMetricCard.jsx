@@ -95,7 +95,7 @@ export default function DynamicMetricCard({ children, title, uppercaseSub, value
           </div>
           <div className="ux-more">
             <button type="button" className="ux-more-btn" aria-label={`Open ${title} details`}>
-              <span>Open</span>
+              <span></span>
             </button>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
               <path d="m6 9 6 6 6-6" />
