@@ -483,3 +483,394 @@ input[type="range"]::-webkit-slider-thumb {
     font-size: 2rem;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   NEON 3D CARD SYSTEM — Ported from DepthFold / neon project
+   ═══════════════════════════════════════════════════════════ */
+
+/* ——— Ambient grid overlay (dark mode only) ——— */
+.aleph-shell[data-theme="dark"]::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 255, 214, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 214, 0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, black, transparent);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, black, transparent);
+}
+
+.aleph-shell[data-theme="dark"] > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ——— Neon dark mode scrollbar ——— */
+.aleph-shell[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 214, 0.18);
+}
+
+.aleph-shell[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 214, 0.32);
+}
+
+
+/* ——— 3D Card Grid ——— */
+.neon-shape-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 288px), 1fr));
+  gap: clamp(1.1rem, 2.8vw, 1.65rem);
+  align-items: stretch;
+}
+
+@media (min-width: 900px) {
+  .neon-shape-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ——— Core 3D perspective shell ——— */
+.ux-parent {
+  width: 100%;
+  max-width: none;
+  height: 360px;
+  margin-inline: auto;
+  perspective: 1000px;
+  perspective-origin: 50% 50%;
+  filter: drop-shadow(0 28px 50px rgba(0, 40, 30, 0.35));
+}
+
+/* ——— Inner 3D card ——— */
+.ux-card {
+  position: relative;
+  height: 100%;
+  border-radius: 50px;
+  background: var(--ux-grad);
+  transform-style: preserve-3d;
+  transition:
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.55s ease;
+  box-shadow:
+    rgba(5, 71, 17, 0) 40px 50px 25px -40px,
+    rgba(5, 71, 17, 0.22) 0 25px 25px -5px;
+}
+
+.ux-parent:hover .ux-card {
+  transform: rotate3d(1, 1, 0, 28deg);
+  box-shadow:
+    rgba(5, 71, 17, 0.35) 28px 48px 28px -38px,
+    rgba(0, 255, 214, 0.10) 0 0 60px -10px,
+    rgba(5, 71, 17, 0.12) 0 25px 35px 0;
+}
+
+/* ——— Themes (card gradients) ——— */
+.ux-parent--mint {
+  --ux-grad: linear-gradient(135deg, rgb(0, 255, 214) 0%, rgb(8, 226, 96) 100%);
+  --ux-title: #00894d;
+  --ux-body: rgba(0, 137, 78, 0.82);
+  --ux-cta: #00c37b;
+  --ux-orbit: rgba(0, 249, 203, 0.22);
+  --ux-fill: #00894d;
+}
+
+.ux-parent--violet {
+  --ux-grad: linear-gradient(145deg, #a855f7 0%, #6366f1 40%, #ec4899 100%);
+  --ux-title: #3b0764;
+  --ux-body: rgba(59, 7, 100, 0.85);
+  --ux-cta: #7c3aed;
+  --ux-orbit: rgba(216, 180, 254, 0.35);
+  --ux-fill: #5b21b6;
+}
+
+.ux-parent--solar {
+  --ux-grad: linear-gradient(135deg, #fbbf24 0%, #f97316 45%, #dc2626 100%);
+  --ux-title: #7c2d12;
+  --ux-body: rgba(124, 45, 18, 0.88);
+  --ux-cta: #c2410c;
+  --ux-orbit: rgba(254, 243, 199, 0.4);
+  --ux-fill: #9a3412;
+}
+
+.ux-parent--ocean {
+  --ux-grad: linear-gradient(155deg, #22d3ee 0%, #0284c7 50%, #1e3a8a 100%);
+  --ux-title: #0c4a6e;
+  --ux-body: rgba(12, 74, 110, 0.88);
+  --ux-cta: #0369a1;
+  --ux-orbit: rgba(125, 211, 252, 0.35);
+  --ux-fill: #0e7490;
+}
+
+.ux-parent--prism {
+  --ux-grad: conic-gradient(from 200deg at 65% 35%, #22d3ee, #818cf8, #f472b6, #facc15, #22d3ee);
+  --ux-title: #0f172a;
+  --ux-body: rgba(15, 23, 42, 0.88);
+  --ux-cta: #4338ca;
+  --ux-orbit: rgba(255, 255, 255, 0.35);
+  --ux-fill: #312e81;
+}
+
+.ux-parent--void {
+  --ux-grad: linear-gradient(160deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+  --ux-title: #5eead4;
+  --ux-body: rgba(203, 213, 225, 0.82);
+  --ux-cta: #c084fc;
+  --ux-orbit: rgba(167, 139, 250, 0.25);
+  --ux-fill: #c084fc;
+}
+
+.ux-parent--void .ux-card {
+  box-shadow:
+    0 0 0 1px rgba(167, 139, 250, 0.2),
+    rgba(5, 71, 17, 0) 40px 50px 25px -40px,
+    rgba(0, 0, 0, 0.5) 0 25px 35px -5px;
+}
+
+/* ——— Glass layer ——— */
+.ux-glass {
+  transform-style: preserve-3d;
+  position: absolute;
+  inset: 8px;
+  border-radius: 55px;
+  border-top-right-radius: 100%;
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0.82) 100%);
+  transform: translate3d(0, 0, 25px);
+  border-inline-start: 1px solid rgba(255, 255, 255, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.75);
+  transition: all 0.5s ease-in-out;
+  pointer-events: none;
+}
+
+.ux-parent--void .ux-glass {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(15, 23, 42, 0.55) 100%);
+  border-color: rgba(148, 163, 184, 0.25);
+}
+
+/* ——— Orbit logo circles ——— */
+.ux-logo {
+  position: absolute;
+  inset-inline-end: 0;
+  top: 0;
+  transform-style: preserve-3d;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ux-circle {
+  display: block;
+  position: absolute;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  top: 0;
+  inset-inline-end: 0;
+  background: var(--ux-orbit);
+  box-shadow: rgba(100, 100, 111, 0.25) -10px 10px 24px 0;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: all 0.5s ease-in-out;
+}
+
+.ux-circle:nth-child(1) {
+  width: 170px;
+  transform: translate3d(0, 0, 20px);
+  top: 8px;
+  inset-inline-end: 8px;
+}
+.ux-circle:nth-child(2) {
+  width: 140px;
+  transform: translate3d(0, 0, 40px);
+  top: 10px;
+  inset-inline-end: 10px;
+  backdrop-filter: blur(4px);
+  transition-delay: 0.05s;
+}
+.ux-circle:nth-child(3) {
+  width: 110px;
+  transform: translate3d(0, 0, 60px);
+  top: 17px;
+  inset-inline-end: 17px;
+  transition-delay: 0.1s;
+}
+.ux-circle:nth-child(4) {
+  width: 80px;
+  transform: translate3d(0, 0, 80px);
+  top: 23px;
+  inset-inline-end: 23px;
+  transition-delay: 0.15s;
+}
+.ux-circle:nth-child(5) {
+  width: 50px;
+  transform: translate3d(0, 0, 100px);
+  top: 30px;
+  inset-inline-end: 30px;
+  display: grid;
+  place-content: center;
+  transition-delay: 0.2s;
+}
+
+.ux-circle:nth-child(5) svg {
+  width: 20px;
+  fill: #fff;
+}
+
+/* Orbit hover expansion */
+.ux-parent:hover .ux-circle:nth-child(2) {
+  transform: translate3d(0, 0, 60px);
+}
+.ux-parent:hover .ux-circle:nth-child(3) {
+  transform: translate3d(0, 0, 80px);
+}
+.ux-parent:hover .ux-circle:nth-child(4) {
+  transform: translate3d(0, 0, 100px);
+}
+.ux-parent:hover .ux-circle:nth-child(5) {
+  transform: translate3d(0, 0, 120px);
+}
+
+/* ——— Card content layer ——— */
+.ux-content {
+  padding: 60px 4rem 0 1.85rem;
+  transform: translate3d(0, 0, 26px);
+  position: relative;
+  z-index: 3;
+}
+
+.ux-title {
+  display: block;
+  color: var(--ux-title);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.ux-text {
+  display: block;
+  margin-top: 1.05rem;
+  color: var(--ux-body);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+/* ——— Bottom action bar ——— */
+.ux-bottom {
+  padding: 10px 12px;
+  transform-style: preserve-3d;
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transform: translate3d(0, 0, 26px);
+  z-index: 4;
+}
+
+.ux-social {
+  display: flex;
+  gap: 10px;
+  transform-style: preserve-3d;
+}
+
+.ux-social-btn {
+  width: 32px;
+  aspect-ratio: 1;
+  padding: 6px;
+  background: #fff;
+  border-radius: 50%;
+  border: none;
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+  box-shadow: rgba(5, 71, 17, 0.35) 0 8px 6px -5px;
+  transition:
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out,
+    background 0.2s;
+}
+
+.ux-social-btn:nth-child(1) { transition-delay: 0.05s; }
+.ux-social-btn:nth-child(2) { transition-delay: 0.1s; }
+.ux-social-btn:nth-child(3) { transition-delay: 0.15s; }
+
+.ux-social-btn svg {
+  width: 15px;
+  height: 15px;
+  fill: var(--ux-fill);
+}
+
+.ux-social-btn:hover {
+  background: #0f172a;
+}
+.ux-social-btn:hover svg {
+  fill: #fff;
+}
+
+/* Social buttons pop out in 3D on card hover */
+.ux-parent:hover .ux-social-btn {
+  transform: translate3d(0, 0, 50px);
+  box-shadow: rgba(5, 71, 17, 0.25) -5px 20px 12px 0;
+}
+
+/* ——— More / CTA button ——— */
+.ux-more {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 42%;
+  justify-content: flex-end;
+  transition: transform 0.2s ease;
+}
+
+.ux-more:hover {
+  transform: translate3d(0, 0, 10px);
+}
+
+.ux-more-btn {
+  background: none;
+  border: none;
+  color: var(--ux-cta);
+  font-weight: 800;
+  font-size: 0.75rem;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ux-more svg {
+  fill: none;
+  stroke: var(--ux-cta);
+  stroke-width: 3px;
+  max-height: 15px;
+  width: 18px;
+}
+
+/* ——— Reduced motion ——— */
+@media (prefers-reduced-motion: reduce) {
+  .ux-card,
+  .ux-circle,
+  .ux-social-btn,
+  .ux-more,
+  .ux-glass {
+    transition: none !important;
+  }
+  .ux-parent:hover .ux-card {
+    transform: none;
+  }
+  .ux-parent:hover .ux-circle:nth-child(2),
+  .ux-parent:hover .ux-circle:nth-child(3),
+  .ux-parent:hover .ux-circle:nth-child(4),
+  .ux-parent:hover .ux-circle:nth-child(5) {
+    transform: inherit;
+  }
+  .ux-parent:hover .ux-social-btn {
+    transform: none;
+  }
+}
+
