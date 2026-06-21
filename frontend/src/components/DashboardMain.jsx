@@ -4,21 +4,21 @@ import DynamicMetricCard from './DynamicMetricCard';
 import LayeringAlluvial from './LayeringAlluvial';
 import ClaimsVerification from './ClaimsVerification';
 import AlephCard from './AlephCard';
-import { 
-  fetchHighRiskAccounts, 
-  fetchAccountFeatures, 
-  fetchAccountShap, 
-  fetchAccountClaims, 
-  fetchAccountTransactions, 
-  fetchAccountCopilot, 
-  fetchTypologyAlerts 
+import {
+  fetchHighRiskAccounts,
+  fetchAccountFeatures,
+  fetchAccountShap,
+  fetchAccountClaims,
+  fetchAccountTransactions,
+  fetchAccountCopilot,
+  fetchTypologyAlerts
 } from '../services/apiService';
 
 export default function DashboardMain() {
   const [activeSection, setActiveSection] = useState('topology');
   const [accounts, setAccounts] = useState([]);
   const [selectedAccountId, setSelectedAccountId] = useState('');
-  
+
   // Specific account data states
   const [features, setFeatures] = useState(null);
   const [shapData, setShapData] = useState([]);
@@ -26,7 +26,7 @@ export default function DashboardMain() {
   const [pathData, setPathData] = useState([]);
   const [copilotReport, setCopilotReport] = useState('');
   const [allAlerts, setAllAlerts] = useState([]);
-  
+
   // UI states
   const [loading, setLoading] = useState(true);
   const [loadingDetails, setLoadingDetails] = useState(false);
@@ -42,11 +42,11 @@ export default function DashboardMain() {
         setLoading(true);
         const fetchedAccounts = await fetchHighRiskAccounts();
         setAccounts(fetchedAccounts);
-        
+
         if (fetchedAccounts.length > 0) {
           setSelectedAccountId(String(fetchedAccounts[0].account_id));
         }
-        
+
         const fetchedAlerts = await fetchTypologyAlerts();
         setAllAlerts(fetchedAlerts);
       } catch (err) {
@@ -61,11 +61,11 @@ export default function DashboardMain() {
   // Update selected account deep-dive details
   useEffect(() => {
     if (!selectedAccountId) return;
-    
+
     async function loadAccountDetails() {
       try {
         setLoadingDetails(true);
-        
+
         // Parallel fetching
         const [feat, shap, clms, path, copilot] = await Promise.allSettled([
           fetchAccountFeatures(selectedAccountId),
@@ -80,7 +80,7 @@ export default function DashboardMain() {
         if (clms.status === 'fulfilled') setClaims(clms.value);
         if (path.status === 'fulfilled') setPathData(path.value);
         if (copilot.status === 'fulfilled') setCopilotReport(copilot.value);
-        
+
         setCopiedCopilot(false);
       } catch (err) {
         console.error("Error loading account deep dive details:", err);
@@ -111,7 +111,7 @@ export default function DashboardMain() {
   const handleDownloadReport = () => {
     if (!copilotReport) return;
     const element = document.createElement("a");
-    const file = new Blob([copilotReport], {type: 'text/plain'});
+    const file = new Blob([copilotReport], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
     element.download = `SAR_Report_Account_${selectedAccountId}.txt`;
     document.body.appendChild(element);
@@ -145,26 +145,26 @@ export default function DashboardMain() {
 
   return (
     <WorkspaceShell activeSection={activeSection} setActiveSection={setActiveSection}>
-      
+
       {/* Top Overview Cards (Only shown on Graph Topology & Explainability Hub) */}
       {(activeSection === 'topology' || activeSection === 'ml-explain') && (
         <div className="neon-shape-grid mb-10">
-          
+
           <DynamicMetricCard
             variant="mint"
-            title="Leiden Clustering" 
-            uppercaseSub="Community Risk Index" 
+            title="Leiden Clustering"
+            uppercaseSub="Community Risk Index"
             value={features && features.scan_cluster !== undefined ? `Cluster ${features.scan_cluster}` : "High Density"}
             trend={{ direction: 'up', value: '+14% Risk' }}
           >
-            Node clusters with low account ages and high internal transaction ratios 
+            Node clusters with low account ages and high internal transaction ratios
             are grouped into localized risk pools.
           </DynamicMetricCard>
 
           <DynamicMetricCard
             variant="violet"
-            title="Hawkes Intensity" 
-            uppercaseSub="Time-Series Velocity" 
+            title="Hawkes Intensity"
+            uppercaseSub="Time-Series Velocity"
             value={features && features.hawkes_intensity !== undefined ? `${features.hawkes_intensity.toFixed(3)} λ` : "8.824 λ"}
           >
             Tracks rapid cash flow patterns across accounts to isolate automated layering cycles.
@@ -172,8 +172,8 @@ export default function DashboardMain() {
 
           <DynamicMetricCard
             variant="solar"
-            title="Structuring Evasion" 
-            uppercaseSub="Threshold Proximity" 
+            title="Structuring Evasion"
+            uppercaseSub="Threshold Proximity"
             value={features && features.tps_score !== undefined ? `${(features.tps_score * 100).toFixed(1)}%` : "98.0%"}
           >
             Identifies transaction patterns structured just below standard regulatory limits (e.g., NPR 1,000,000).
@@ -184,111 +184,110 @@ export default function DashboardMain() {
       {/* Main Workspace Layers */}
       {activeSection === 'topology' && (
         <div className="space-y-10">
-          
+
           {/* Top Panel: Queue & Profile */}
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
-            
-            {/* Action Queue Control & Table */}
-            <AlephCard className="xl:col-span-2 p-8 flex flex-col h-[520px]">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                <div>
-                  <h3 className="text-lg font-serif font-bold text-[#2D2D2D]">High-Risk Analyst Action Queue</h3>
-                  <p className="text-xs text-[#6B6864] font-light mt-0.5">Prioritized suspicious entities mapped by graph risk contagion.</p>
-                </div>
-                
-                {/* Score slider & Filters */}
-                <div className="flex items-center space-x-6 shrink-0">
-                  <div className="flex flex-col">
-                    <span className="text-[9px] uppercase tracking-wider text-[#6B6864] font-bold">Min Score: {minScoreFilter.toFixed(2)}</span>
-                    <input 
-                      type="range" 
-                      min="0" 
-                      max="1" 
-                      step="0.05" 
-                      value={minScoreFilter} 
-                      onChange={(e) => setMinScoreFilter(parseFloat(e.target.value))}
-                      className="w-28 accent-[#99B29B] h-1 bg-[#EAE1D4] rounded-lg cursor-pointer"
-                    />
-                  </div>
-                  <div className="flex space-x-1">
-                    {['CRITICAL', 'SEVERE', 'HIGH'].map(b => (
-                      <button
-                        key={b}
-                        onClick={() => toggleBand(b)}
-                        className={`px-2 py-0.5 rounded text-[8px] font-bold tracking-wider uppercase transition-all ${
-                          selectedBands.includes(b) 
-                            ? 'bg-[#99B29B] text-white' 
-                            : 'bg-[#FAF7F2] text-[#6B6864] border border-[#EAE1D4]'
-                        }`}
-                      >
-                        {b}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
 
-              {/* Data Table */}
-              <div className="flex-1 overflow-y-auto border border-[#FAF7F2] rounded-lg">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-[#FAF7F2] text-[#6B6864] uppercase tracking-wider text-[9px] font-bold sticky top-0 border-b border-[#EAE1D4]">
-                      <th className="py-3 px-4">Rank</th>
-                      <th className="py-3 px-4">Account ID</th>
-                      <th className="py-3 px-4">Risk Score</th>
-                      <th className="py-3 px-4">Risk Band</th>
-                      <th className="py-3 px-4 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#EAE1D4]">
-                    {filteredAccounts.map((acc) => (
-                      <tr 
-                        key={acc.account_id} 
-                        onClick={() => setSelectedAccountId(String(acc.account_id))}
-                        className={`hover:bg-[#FAF7F2]/50 cursor-pointer transition-colors ${
-                          selectedAccountId === String(acc.account_id) ? 'bg-[#FAF7F2] font-semibold' : ''
-                        }`}
-                      >
-                        <td className="py-3 px-4 text-[#6B6864] font-mono">#{acc.rank || '-'}</td>
-                        <td className="py-3 px-4 font-mono">{acc.account_id}</td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center space-x-2">
-                            <span className="font-mono">{(acc.risk_score || 0).toFixed(3)}</span>
-                            <div className="w-16 bg-[#EAE1D4] h-1.5 rounded-full overflow-hidden">
-                              <div 
-                                className="bg-[#C07A50] h-full rounded-full" 
-                                style={{ width: `${(acc.risk_score || 0) * 100}%` }}
-                              />
+            {/* Action Queue Control & Table */}
+            <AlephCard className="xl:col-span-2 p-8 h-[520px] action-queue-card">
+              <div className="flex flex-col h-full">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                  <div>
+                    <h3 className="text-lg font-serif font-bold text-[#2D2D2D]">High-Risk Analyst Action Queue</h3>
+                    <p className="text-xs text-[#6B6864] font-light mt-0.5">Prioritized suspicious entities mapped by graph risk contagion.</p>
+                  </div>
+
+                  {/* Score slider & Filters */}
+                  <div className="flex items-center space-x-6 shrink-0">
+                    <div className="flex flex-col">
+                      <span className="text-[9px] uppercase tracking-wider text-[#6B6864] font-bold">Min Score: {minScoreFilter.toFixed(2)}</span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        value={minScoreFilter}
+                        onChange={(e) => setMinScoreFilter(parseFloat(e.target.value))}
+                        className="w-28 accent-[#99B29B] h-1 bg-[#EAE1D4] rounded-lg cursor-pointer"
+                      />
+                    </div>
+                    <div className="flex space-x-1">
+                      {['CRITICAL', 'SEVERE', 'HIGH'].map(b => (
+                        <button
+                          key={b}
+                          onClick={() => toggleBand(b)}
+                          className={`px-2 py-0.5 rounded text-[8px] font-bold tracking-wider uppercase transition-all ${selectedBands.includes(b)
+                            ? 'bg-[#99B29B] text-white'
+                            : 'bg-[#FAF7F2] text-[#6B6864] border border-[#EAE1D4]'
+                            }`}
+                        >
+                          {b}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Data Table */}
+                <div className="flex-1 overflow-y-auto border border-[#FAF7F2] rounded-lg">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-[#FAF7F2] text-[#6B6864] uppercase tracking-wider text-[9px] font-bold sticky top-0 border-b border-[#EAE1D4]">
+                        <th className="py-3 px-4">Rank</th>
+                        <th className="py-3 px-4">Account ID</th>
+                        <th className="py-3 px-4">Risk Score</th>
+                        <th className="py-3 px-4">Risk Band</th>
+                        <th className="py-3 px-4 text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#EAE1D4]">
+                      {filteredAccounts.map((acc) => (
+                        <tr
+                          key={acc.account_id}
+                          onClick={() => setSelectedAccountId(String(acc.account_id))}
+                          className={`hover:bg-[#FAF7F2]/50 cursor-pointer transition-colors ${selectedAccountId === String(acc.account_id) ? 'bg-[#FAF7F2] font-semibold' : ''
+                            }`}
+                        >
+                          <td className="py-3 px-4 text-[#6B6864] font-mono">#{acc.rank || '-'}</td>
+                          <td className="py-3 px-4 font-mono">{acc.account_id}</td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-2">
+                              <span className="font-mono">{(acc.risk_score || 0).toFixed(3)}</span>
+                              <div className="w-16 bg-[#EAE1D4] h-1.5 rounded-full overflow-hidden">
+                                <div
+                                  className="bg-[#C07A50] h-full rounded-full"
+                                  style={{ width: `${(acc.risk_score || 0) * 100}%` }}
+                                />
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                            acc.risk_band === 'CRITICAL' ? 'bg-red-100 text-red-700' :
-                            acc.risk_band === 'SEVERE' ? 'bg-orange-100 text-orange-700' :
-                            acc.risk_band === 'HIGH' ? 'bg-[#C07A50]/15 text-[#C07A50]' : 'bg-[#99B29B]/15 text-[#99B29B]'
-                          }`}>
-                            {acc.risk_band}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-right">
-                          <button 
-                            className="text-[#99B29B] hover:text-[#5F7F62] font-bold tracking-wider uppercase text-[10px]"
-                          >
-                            Investigate
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                    {filteredAccounts.length === 0 && (
-                      <tr>
-                        <td colSpan="5" className="py-10 text-center text-[#6B6864] italic">
-                          No entities match the filtered criteria.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${acc.risk_band === 'CRITICAL' ? 'bg-red-100 text-red-700' :
+                              acc.risk_band === 'SEVERE' ? 'bg-orange-100 text-orange-700' :
+                                acc.risk_band === 'HIGH' ? 'bg-[#C07A50]/15 text-[#C07A50]' : 'bg-[#99B29B]/15 text-[#99B29B]'
+                              }`}>
+                              {acc.risk_band}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            <button
+                              className="text-[#99B29B] hover:text-[#5F7F62] font-bold tracking-wider uppercase text-[10px]"
+                            >
+                              Investigate
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredAccounts.length === 0 && (
+                        <tr>
+                          <td colSpan="5" className="py-10 text-center text-[#6B6864] italic">
+                            No entities match the filtered criteria.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </AlephCard>
 
@@ -399,8 +398,8 @@ export default function DashboardMain() {
               </thead>
               <tbody className="divide-y divide-[#EAE1D4]">
                 {allAlerts.map((alt, idx) => (
-                  <tr 
-                    key={idx} 
+                  <tr
+                    key={idx}
                     onClick={() => {
                       setSelectedAccountId(String(alt.account_id));
                       setActiveSection('topology');
@@ -433,7 +432,7 @@ export default function DashboardMain() {
       {/* Explainability Hub */}
       {activeSection === 'ml-explain' && (
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-10">
-          
+
           {/* SHAP Attributions (Left 2 columns) */}
           <AlephCard className="xl:col-span-2 p-8 flex flex-col h-[560px]">
             <div className="mb-6">
@@ -458,10 +457,9 @@ export default function DashboardMain() {
                       <div className="flex justify-between items-center text-xs">
                         <span className="font-mono font-medium text-[#2D2D2D]">{shap.feature}</span>
                         <div className="flex items-center space-x-2">
-                          <span className={`text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.2 rounded ${
-                            shap.driver_group === 'community' ? 'bg-[#99B29B]/15 text-[#99B29B]' :
+                          <span className={`text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.2 rounded ${shap.driver_group === 'community' ? 'bg-[#99B29B]/15 text-[#99B29B]' :
                             shap.driver_group === 'counterparty' ? 'bg-[#C07A50]/15 text-[#C07A50]' : 'bg-[#FAF7F2] text-[#6B6864]'
-                          }`}>
+                            }`}>
                             {shap.driver_group}
                           </span>
                           <span className={`font-mono font-semibold ${isPositive ? 'text-[#99B29B]' : 'text-red-500'}`}>
@@ -470,9 +468,9 @@ export default function DashboardMain() {
                         </div>
                       </div>
                       <div className="w-full bg-[#FAF7F2] h-2 rounded-full relative overflow-hidden">
-                        <div 
-                           className={`h-full rounded-full absolute ${isPositive ? 'bg-[#99B29B] left-1/2' : 'bg-red-400 right-1/2'}`}
-                          style={{ 
+                        <div
+                          className={`h-full rounded-full absolute ${isPositive ? 'bg-[#99B29B] left-1/2' : 'bg-red-400 right-1/2'}`}
+                          style={{
                             width: `${absPercent / 2}%`,
                           }}
                         />
@@ -497,15 +495,15 @@ export default function DashboardMain() {
                   <h3 className="text-xl font-serif font-bold text-[#2D2D2D] mt-0.5">Compliance SAR Case Dossier</h3>
                   <p className="text-xs text-[#6B6864] font-light mt-0.5">Auto-generated filing draft based on structural graph signals.</p>
                 </div>
-                
+
                 <div className="flex space-x-3">
-                  <button 
+                  <button
                     onClick={copyToClipboard}
                     className="px-3.5 py-2 border border-[#EAE1D4] text-[#2D2D2D] hover:bg-[#FAF7F2] rounded-lg text-[10px] font-semibold uppercase tracking-wider transition-all"
                   >
                     {copiedCopilot ? 'Copied!' : 'Copy Report'}
                   </button>
-                  <button 
+                  <button
                     onClick={handleDownloadReport}
                     className="px-3.5 py-2 bg-[#2D2D2D] text-white hover:bg-black rounded-lg text-[10px] font-semibold uppercase tracking-wider transition-all shadow-sm"
                   >
@@ -520,8 +518,8 @@ export default function DashboardMain() {
                   <p className="text-[10px] text-[#6B6864] uppercase tracking-wider">Generating SAR narrative...</p>
                 </div>
               ) : (
-                <textarea 
-                  value={copilotReport} 
+                <textarea
+                  value={copilotReport}
                   readOnly
                   className="w-full h-[400px] border border-[#EAE1D4] rounded-lg p-6 bg-[#FAF7F2]/50 font-mono text-[11px] leading-relaxed text-[#2D2D2D] focus:outline-none overflow-y-auto resize-none"
                 />
@@ -535,13 +533,13 @@ export default function DashboardMain() {
       {/* STR Verification Layer */}
       {activeSection === 'str-alignment' && (
         <div className="space-y-10">
-          
+
           <AlephCard className="p-8">
             <div className="mb-6">
               <h3 className="text-xl font-serif font-bold text-[#2D2D2D]">STR Claims Narrative Verification Dashboard</h3>
-              <p className="text-xs text-[#6B6864] font-light mt-0.5">Validating legal report testimonies against computed multi-hop transfer pathways.</p>
+              <p className="text-xs text-[#6B6864] font-light mt-0.5">Where the Paisa Really Went</p>
             </div>
-            
+
             {loadingDetails ? (
               <div className="flex flex-col items-center justify-center py-20">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-[#99B29B] mb-2"></div>
@@ -555,17 +553,16 @@ export default function DashboardMain() {
                     {claims.map((claim, idx) => (
                       <div key={idx} className="p-4 border border-[#EAE1D4] rounded-lg">
                         <div className="flex justify-between items-start">
-                           <h5 className="text-xs font-bold font-mono text-[#2D2D2D]">{claim.text}</h5>
-                          <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase ${
-                            claim.status === 'CONFIRMED' || claim.status === 'VERIFIED' ? 'bg-[#99B29B]/15 text-[#99B29B]' : 'bg-red-100 text-red-700'
-                          }`}>
+                          <h5 className="text-xs font-bold font-mono text-[#2D2D2D]">{claim.text}</h5>
+                          <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase ${claim.status === 'CONFIRMED' || claim.status === 'VERIFIED' ? 'bg-[#99B29B]/15 text-[#99B29B]' : 'bg-red-100 text-red-700'
+                            }`}>
                             {claim.status}
                           </span>
                         </div>
                         <p className="text-xs text-[#6B6864] font-light mt-2">{claim.details}</p>
                         <div className="text-[9px] text-[#6B6864] mt-3 font-mono flex justify-between">
                           <span>Report Reference: {claim.reportId}</span>
-                          <span>Alignment Engine v3</span>
+                          <span></span>
                         </div>
                       </div>
                     ))}
@@ -576,18 +573,18 @@ export default function DashboardMain() {
                   <div>
                     <h4 className="text-sm font-serif font-semibold text-[#2D2D2D] mb-3">Verification Rationale</h4>
                     <p className="text-xs text-[#6B6864] leading-relaxed font-light mb-4">
-                      The Narrative Claims alignment engine extracts testimonies (dates, amounts, bank names, and transfer mechanisms) 
+                      The Narrative Claims alignment engine extracts testimonies (dates, amounts, bank names, and transfer mechanisms)
                       from compliance officer texts using phonetic & levenshtein string resolution rules.
                     </p>
                     <p className="text-xs text-[#6B6864] leading-relaxed font-light">
-                      It cross-checks these references directly against the continuous-time multigraph edge listings. 
-                      If matching nodes exhibit the stated behaviors, they are tagged as <strong className="text-[#99B29B]">CONFIRMED</strong>. 
+                      It cross-checks these references directly against the continuous-time multigraph edge listings.
+                      If matching nodes exhibit the stated behaviors, they are tagged as <strong className="text-[#99B29B]">CONFIRMED</strong>.
                       If no matching edge traces are found or threshold criteria are not reached, they are logged as <strong className="text-red-500">REFUTED</strong>.
                     </p>
                   </div>
                   <div className="pt-6 border-t border-[#EAE1D4] flex justify-between items-center">
                     <span className="text-[10px] font-bold text-[#6B6864] uppercase tracking-wider">Claims Matched: {claims.length}</span>
-                    <button 
+                    <button
                       onClick={() => setActiveSection('topology')}
                       className="text-[#99B29B] font-bold tracking-wider uppercase text-[10px]"
                     >
@@ -600,7 +597,7 @@ export default function DashboardMain() {
               <p className="text-xs text-[#6B6864] italic py-10 text-center">No active narrative claims found linking this entity.</p>
             )}
           </AlephCard>
-          
+
         </div>
       )}
 
