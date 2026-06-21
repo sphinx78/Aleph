@@ -1,14 +1,11 @@
-# ALEPH: Anti-Money Laundering Intelligence Operating System
-
+# ALEPH א Anti-Laundering Entity & Pattern Hunter
 ## AI/ML Intelligence Hackathon 2026 - Track 3: Network & Graph Intelligence
-
-
-## Overview
 
 ALEPH is an enterprise-grade financial intelligence engine, continuous-time temporal network analyzer, and risk-prioritization system built to isolate structured money laundering networks. 
 
-It processes **~1,000,000 transactions** across **~6,800 accounts** as a directed temporal multigraph, fusing rule-based typology alerts with graph embeddings and emulated GNN attention scores through a unified evidence-mesh architecture.
+It processes **~1,000,000 transactions** across **~6,800 accounts** as a temporal multigraph, fusing rule-based typology alerts with graph embeddings and emulated GNN attention scores through a unified evidence-mesh architecture.
 
+---
 
 ## System Architecture
 
@@ -25,23 +22,27 @@ Layer 12: Investigation Engine   ◄── Layer 11: Explainability       ◄─
             ▼
 Layer 13: Analyst Copilot (LLM)  ──► Layer 14: Interactive Dashboard
 ```
+
 ---
 
 ## Core Features & Scientific Methods
 
-* **Temporal Flow Modeling:** Instead of static graphs, ALEPH models transactions as exact timestamped edges. It tracks cash flow speed and decay using self-exciting **Hawkes Processes** and **Directed Flow Asymmetry (DFA)**.
-* **Structuring Evasion Detection:** The **Threshold Proximity Score (TPS)** identifies transaction frequencies structured right below the regulatory filing threshold (NPR 1,000,000) to flag structuring patterns.
-* **Soundex Entity Linking:** Resolves unstructured names in compliance narratives to database accounts using Soundex phonetic hashing and Levenshtein distances.
-* **Dempster-Shafer Evidence Fusion:** Synthesizes conflicting signals (rules, embeddings, ML scores) into a unified risk probability.
-* **SHAP Explainable AI:** Decomposes risk predictions into four attribution drivers (Self-behavior, Counterparty risk, Community profile, and External alerts).
+* **Temporal Flow Modeling:** Models transactions as continuous-time timestamped edges. It tracks cash flow speed and decay using self-exciting **Hawkes Processes** and **Directed Flow Asymmetry (DFA)**.
+* **Neo4j AuraDB Graph Integration:** Securely queries 2-hop undirected subgraphs via the official Neo4j Python Driver, capturing both inbound and outbound counterparties in a single Cypher traversal.
+* **Force-Directed Topology Visualization:** Renders interactive counterparty networks using `react-force-graph-2d` wrapped in glassmorphic cards, featuring node role-coloring (Terracotta/Orange/Sage) and hover halos.
+* **Streaming Graph RAG Copilot:** A Server-Sent Events (SSE) chat terminal powered by a local Ollama server running `llama3.1` to stream compliance insights token-by-token alongside built-in connectivity alerts.
+* **Structuring Evasion Detection:** The **Threshold Proximity Score (TPS)** flags transaction frequencies structured right below regulatory reporting limits (NPR 1,000,000).
+* **Soundex Entity Linking:** Resolves unstructured names in compliance narratives to database accounts using Soundex phonetic hashing and Levenshtein edit distance thresholds.
+* **Dempster-Shafer Evidence Fusion:** Combines conflicting indicators (rule triggers, structural embeddings, and ML classifications) into a unified risk probability.
+* **Explainable AI & Counterfactuals:** Decomposes risk profiles into SHAP attributions and simulates target risk reduction under hypothetical transaction deletions.
 
 ---
-
 
 ## Project Structure
 
 ```
 ├── .gitignore
+├── .env.example               # Template for backend and LLM variables
 ├── README.md                  # Project documentation (this file)
 ├── architecture.md            # Deep-dive system specifications
 ├── explanation.md             # Core logic and line-by-line walks
@@ -67,7 +68,7 @@ Layer 13: Analyst Copilot (LLM)  ──► Layer 14: Interactive Dashboard
 │
 ├── app/
 │   ├── app.py                 # Streamlit visualizer (Legacy)
-│   ├── main.py                # Asynchronous FastAPI backend server
+│   ├── main.py                # Asynchronous FastAPI backend server with SSE streaming
 │   └── components/
 │       ├── flow_visualizer.py # Network graph plotting utilities
 │       └── str_validator.py   # Narrative claim alignment checks
@@ -82,11 +83,13 @@ Layer 13: Analyst Copilot (LLM)  ──► Layer 14: Interactive Dashboard
 │       ├── main.jsx           # App mounting entry point
 │       ├── components/
 │       │   ├── GlobeLanding.jsx      # Light-theme spinning orthographic globe
-│       │   ├── WorkspaceShell.jsx    # Sidebar layout and connection status
+│       │   ├── WorkspaceShell.jsx    # Sidebar navigation & connection telemetry
 │       │   ├── DynamicMetricCard.jsx # Mouse-tracking indicator widget
 │       │   ├── AlephCard.jsx         # Custom glassmorphic mouse-tracking card
 │       │   ├── LayeringAlluvial.jsx  # D3 alluvial transfer flow map
 │       │   ├── ClaimsVerification.jsx# Narrative vs. transaction validator card
+│       │   ├── ForceGraphPanel.jsx   # 2-hop Force Directed transaction network panel
+│       │   ├── GraphRagCopilot.jsx   # Streaming RAG Chat assistant
 │       │   └── DashboardMain.jsx     # Master workspace layout
 │       └── services/
 │           └── apiService.js         # API request client
@@ -100,7 +103,7 @@ Layer 13: Analyst Copilot (LLM)  ──► Layer 14: Interactive Dashboard
 
 ## Setup & Running Instructions
 
-### Backend Setup
+### Backend & Database Configuration
 1. Create a virtual environment and activate it:
    ```bash
    python -m venv venv
@@ -111,16 +114,28 @@ Layer 13: Analyst Copilot (LLM)  ──► Layer 14: Interactive Dashboard
    ```bash
    pip install -r requirements.txt
    ```
-3. Run the end-to-end data pipeline to train models and generate features:
+3. Set up your environment variables:
+   ```bash
+   cp .env.example .env
+   ```
+   Fill in your Neo4j AuraDB credentials (`NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD`).
+
+4. Ensure your local **Ollama** engine is running:
+   ```bash
+   ollama pull llama3.1
+   ollama run llama3.1
+   ```
+
+5. Run the end-to-end data pipeline to train models and generate features:
    ```bash
    python main.py
    ```
-4. Start the FastAPI backend server:
+6. Start the FastAPI backend server:
    ```bash
    python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
    ```
 
-### Frontend Setup
+### Frontend Configuration & Launch
 1. Navigate to the frontend directory:
    ```bash
    cd frontend
@@ -137,3 +152,10 @@ Layer 13: Analyst Copilot (LLM)  ──► Layer 14: Interactive Dashboard
 
 ---
 
+## Verification & Testing
+
+Verify that all backend algorithms and modules execute correctly:
+```bash
+python -m pytest tests/ -v
+```
+All 22 core test cases (validating Hawkes processes, DFA indexes, Soundex, DFS layering, and Hawala matches) should pass successfully.
